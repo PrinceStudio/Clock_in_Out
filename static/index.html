@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clock In / Out</title>
+  <script src="https://cdn.tailwindcss.com">
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
+  </script>
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    .hidden {
+      display: none !important;
+    }
+    .fade-in {
+      animation: fadeIn 0.25s ease-out;
+    }
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    .modal-overlay {
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .chart-container {
+      position: relative;
+      min-height: 220px;
+    }
+    @media (max-width: 640px) {
+      .chart-container {
+        min-height: 180px;
+      }
+    }
+    select,
+    input {
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    select.form-select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 0.5rem center;
+      background-size: 12px;
+      padding-right: 2rem;
+    }
+    .tab-btn.active {
+      color: #4f46e5;
+      border-bottom: 2px solid #4f46e5;
+    }
+    .btn-primary {
+      background: #4f46e5;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .btn-primary:hover {
+      background: #4338ca;
+    }
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    .btn-success {
+      background: #10b981;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .btn-success:hover {
+      background: #059669;
+    }
+    .btn-ghost {
+      color: #64748b;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+    .btn-ghost:hover {
+      background: #f1f5f9;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .table-wrap table {
+      min-width: 600px;
+    }
+    @media (max-width: 640px) {
+      .table-wrap table {
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+
+  <!-- ════════════════════════════════════════════════════════════
+  LOGIN VIEW
+  ════════════════════════════════════════════════════════════ -->
+  <div id="login-view" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-sm bg-white rounded-2xl shadow-lg p-8 fade-in">
+      <div class="text-center mb-8">
+        <div class="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <svg class="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-slate-800">Clock In / Out</h1>
+        <p class="text-slate-500 text-sm mt-1">Enter your password to continue</p>
+      </div>
+      <form id="login-form">
+        <div class="mb-6">
+          <label for="login-password" class="sr-only">Password</label>
+          <input
+          id="login-password"
+          type="password"
+          placeholder="Enter your password"
+          required
+          autocomplete="current-password"
+          class="w-full px-4 py-3 border border-slate-300 rounded-xl text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+          />
+        </div>
+        <p id="login-error" class="text-red-500 text-sm mb-3 hidden"></p>
+        <button
+        type="submit"
+        class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-base"
+        >
+        Sign In
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+EMPLOYEE VIEW
+════════════════════════════════════════════════════════════ -->
+<div id="employee-view" class="hidden min-h-screen bg-slate-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-20">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div>
+        <h2 id="emp-name" class="text-lg font-bold text-slate-800"></h2>
+        <p id="emp-site" class="text-sm text-slate-500"></p>
+      </div>
+      <button id="emp-logout" class="btn-ghost text-sm flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Logout
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-4xl mx-auto px-4 py-6 space-y-6">
+    <!-- Active Shift Banner -->
+    <div id="active-shift-banner" class="hidden bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-center gap-3 text-emerald-800">
+      <span class="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></span>
+      <span class="font-medium">Active Shift</span>
+      <span class="text-sm text-emerald-600">Started at <span id="active-clock-in"></span></span>
+    </div>
+
+    <!-- Shift Controls -->
+    <div class="bg-white rounded-xl shadow-sm p-5 sm:p-6">
+      <h3 class="text-base font-semibold text-slate-700 mb-4">Shift Log</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-600 mb-1">Date</label>
+          <input type="date" id="shift-date"
+          class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-600 mb-1">Time</label>
+          <div class="flex gap-2">
+            <select id="time-hour" class="w-20 px-2 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
+              <option value="12">12</option>
+              <option value="01">01</option>
+              <option value="02">02</option>
+              <option value="03">03</option>
+              <option value="04">04</option>
+              <option value="05">05</option>
+              <option value="06">06</option>
+              <option value="07">07</option>
+              <option value="08">08</option>
+              <option value="09">09</option>
+              <option value="10">10</option>
+              <option value="11">11</option>
+            </select>
+            <select id="time-minute" class="w-20 px-2 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
+              <option value="00">00</option>
+              <option value="05">05</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="35">35</option>
+              <option value="40">40</option>
+              <option value="45">45</option>
+              <option value="50">50</option>
+              <option value="55">55</option>
+            </select>
+            <select id="time-period" class="w-24 px-2 py-2.5 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <button id="btn-start-shift" class="btn-success px-6 py-2.5 text-sm font-semibold flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Start Shift
+        </button>
+        <button id="btn-end-shift" class="btn-danger px-6 py-2.5 text-sm font-semibold flex items-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+          </svg>
+          End Shift
+        </button>
+      </div>
+      <p id="shift-message" class="mt-3 text-sm text-slate-500"></p>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <h3 class="text-sm font-semibold text-slate-700 mb-3">Hours This Week</h3>
+        <div class="chart-container">
+          <canvas id="weekly-chart"></canvas>
+        </div>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <h3 class="text-sm font-semibold text-slate-700 mb-3">Hours This Month</h3>
+        <div class="chart-container">
+          <canvas id="monthly-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Shifts -->
+    <div class="bg-white rounded-xl shadow-sm p-5">
+      <h3 class="text-sm font-semibold text-slate-700 mb-3">Recent Shifts</h3>
+      <div class="table-wrap">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-left text-slate-500 border-b border-slate-200">
+              <th class="pb-2 font-medium">Date</th>
+              <th class="pb-2 font-medium">In</th>
+              <th class="pb-2 font-medium">Out</th>
+              <th class="pb-2 font-medium">Hours</th>
+              <th class="pb-2 font-medium">Site</th>
+            </tr>
+          </thead>
+          <tbody id="emp-shifts-body" class="divide-y divide-slate-100">
+          </tbody>
+        </table>
+        <p id="emp-shifts-empty" class="text-center text-slate-400 py-6 hidden">No shifts recorded yet.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+ADMIN VIEW
+════════════════════════════════════════════════════════════ -->
+<div id="admin-view" class="hidden min-h-screen bg-slate-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <h2 class="text-lg font-bold text-slate-800">Admin Dashboard</h2>
+      <button id="admin-logout" class="btn-ghost text-sm flex items-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        Logout
+      </button>
+    </div>
+    <!-- Tabs -->
+    <div class="max-w-6xl mx-auto px-4">
+      <nav class="flex gap-6 -mb-px text-sm font-medium text-slate-500">
+        <button class="tab-btn active py-3 border-b-2 border-indigo-600 text-indigo-600" data-tab="overview">Overview</button>
+        <button class="tab-btn py-3" data-tab="shifts">Shifts</button>
+        <button class="tab-btn py-3" data-tab="employees">Employees</button>
+        <button class="tab-btn py-3" data-tab="sites">Sites &amp; Schedule</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+
+    <!-- ─── Overview Tab ─── -->
+    <div id="tab-overview" class="tab-content space-y-6">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div class="stat-card">
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Active Shifts</p>
+          <p id="stat-active" class="text-3xl font-bold text-slate-800 mt-1">0</p>
+        </div>
+        <div class="stat-card">
+          <p class="text-xs font-medium text-slate-500 uppercase tracking-wide">Employees</p>
+          <p id="stat-employees" class="text-3xl font-bold text-slate-800 mt-1">0</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-white rounded-xl shadow-sm p-5">
+          <h3 class="text-sm font-semibold text-slate-700 mb-3">Weekly Hours per Employee</h3>
+          <div class="chart-container">
+            <canvas id="admin-weekly-chart"></canvas>
+          </div>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5">
+          <h3 class="text-sm font-semibold text-slate-700 mb-3">Monthly Hours per Employee</h3>
+          <div class="chart-container">
+            <canvas id="admin-monthly-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Shifts Tab ─── -->
+    <div id="tab-shifts" class="tab-content hidden space-y-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <button id="btn-add-shift" class="btn-primary text-sm">+ Add Shift</button>
+        <select id="filter-employee" class="px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white form-select">
+          <option value="">All Employees</option>
+        </select>
+        <input type="date" id="filter-date-from" class="px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+        <span class="text-slate-400 text-sm">to</span>
+        <input type="date" id="filter-date-to" class="px-3 py-2 border border-slate-300 rounded-lg text-sm" />
+        <button id="btn-filter-shifts" class="btn-ghost text-sm border border-slate-300">Filter</button>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="table-wrap">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-slate-500 border-b border-slate-200">
+                <th class="pb-2 font-medium">Employee</th>
+                <th class="pb-2 font-medium">Date</th>
+                <th class="pb-2 font-medium">In</th>
+                <th class="pb-2 font-medium">Out</th>
+                <th class="pb-2 font-medium">Hours</th>
+                <th class="pb-2 font-medium">Site</th>
+                <th class="pb-2 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-shifts-body" class="divide-y divide-slate-100">
+            </tbody>
+          </table>
+          <p id="admin-shifts-empty" class="text-center text-slate-400 py-6 hidden">No shifts found.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Employees Tab ─── -->
+    <div id="tab-employees" class="tab-content hidden space-y-4">
+      <button id="btn-add-employee" class="btn-primary text-sm">+ Add Employee</button>
+      <div class="bg-white rounded-xl shadow-sm p-5">
+        <div class="table-wrap">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-slate-500 border-b border-slate-200">
+                <th class="pb-2 font-medium">Name</th>
+                <th class="pb-2 font-medium">Type</th>
+                <th class="pb-2 font-medium">Status</th>
+                <th class="pb-2 font-medium">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="admin-employees-body" class="divide-y divide-slate-100">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Sites & Schedule Tab ─── -->
+    <div id="tab-sites" class="tab-content hidden space-y-6">
+      <!-- Sites Section -->
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-semibold text-slate-700">Work Sites</h3>
+          <button id="btn-add-site" class="btn-primary text-sm">+ Add Site</button>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5">
+          <div class="table-wrap">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-slate-500 border-b border-slate-200">
+                  <th class="pb-2 font-medium">Name</th>
+                  <th class="pb-2 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-sites-body" class="divide-y divide-slate-100">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Schedule Section -->
+      <div>
+        <h3 class="text-base font-semibold text-slate-700 mb-3">Schedule Assignments</h3>
+        <div class="bg-white rounded-xl shadow-sm p-5 space-y-4">
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <select id="sched-employee" class="px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+              <option value="">Select Employee</option>
+            </select>
+            <select id="sched-site" class="px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+              <option value="">Select Site</option>
+            </select>
+            <input type="date" id="sched-date" class="px-3 py-2.5 border border-slate-300 rounded-lg text-sm" />
+            <button id="btn-add-schedule" class="btn-primary text-sm">Assign</button>
+          </div>
+          <div class="table-wrap">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="text-left text-slate-500 border-b border-slate-200">
+                  <th class="pb-2 font-medium">Employee</th>
+                  <th class="pb-2 font-medium">Site</th>
+                  <th class="pb-2 font-medium">Date</th>
+                  <th class="pb-2 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-schedules-body" class="divide-y divide-slate-100">
+              </tbody>
+            </table>
+            <p id="admin-schedules-empty" class="text-center text-slate-400 py-4 hidden">No schedules assigned.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════
+MODALS
+════════════════════════════════════════════════════════════ -->
+
+<!-- Generic Alert / Confirm Modal -->
+<div id="modal-alert" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full">
+    <p id="modal-alert-msg" class="text-slate-700 text-center"></p>
+    <div class="flex justify-center gap-3 mt-5">
+      <button id="modal-alert-ok" class="btn-primary text-sm">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Employee Modal -->
+<div id="modal-employee" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full">
+    <h3 id="modal-employee-title" class="text-lg font-semibold text-slate-800 mb-4"></h3>
+    <form id="form-employee">
+      <input type="hidden" id="form-employee-id" />
+      <div class="mb-3">
+        <label class="block text-sm font-medium text-slate-600 mb-1">Name</label>
+        <input type="text" id="form-employee-name" required
+        class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      </div>
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-slate-600 mb-1">
+          Password <span class="text-slate-400 font-normal" id="emp-pass-hint"></span>
+        </label>
+        <input type="text" id="form-employee-password"
+        class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        placeholder="Leave blank to keep current" />
+      </div>
+      <div class="flex gap-3 justify-end">
+        <button type="button" class="btn-ghost" onclick="closeModal('modal-employee')">Cancel</button>
+        <button type="submit" class="btn-primary text-sm">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Site Modal -->
+<div id="modal-site" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl p-6 max-w-sm w-full">
+    <h3 id="modal-site-title" class="text-lg font-semibold text-slate-800 mb-4"></h3>
+    <form id="form-site">
+      <input type="hidden" id="form-site-id" />
+      <div class="mb-4">
+        <label class="block text-sm font-medium text-slate-600 mb-1">Site Name</label>
+        <input type="text" id="form-site-name" required
+        class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+      </div>
+      <div class="flex gap-3 justify-end">
+        <button type="button" class="btn-ghost" onclick="closeModal('modal-site')">Cancel</button>
+        <button type="submit" class="btn-primary text-sm">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Shift Modal -->
+<div id="modal-shift" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+    <h3 id="modal-shift-title" class="text-lg font-semibold text-slate-800 mb-4"></h3>
+    <form id="form-shift">
+      <input type="hidden" id="form-shift-id" />
+      <div class="mb-3">
+        <label class="block text-sm font-medium text-slate-600 mb-1">Employee</label>
+        <select id="form-shift-employee" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select" required>
+          <option value="">Select</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="block text-sm font-medium text-slate-600 mb-1">Site</label>
+        <select id="form-shift-site" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+          <option value="">None</option>
+        </select>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label class="block text-sm font-medium text-slate-600 mb-1">Clock-In Date</label>
+          <input type="date" id="form-shift-ci-date" required class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-600 mb-1">Clock-In Time</label>
+          <div class="flex gap-1">
+            <select id="form-shift-ci-hour" class="w-14 px-1 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+              <option value="12">12</option><option value="01">01</option><option value="02">02</option><option value="03">03</option>
+              <option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option>
+              <option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option>
+            </select>
+            <span class="self-center text-slate-400">:</span>
+            <select id="form-shift-ci-minute" class="w-14 px-1 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+              <option value="00">00</option><option value="05">05</option><option value="10">10</option><option value="15">15</option>
+              <option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option>
+              <option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option>
+            </select>
+            <select id="form-shift-ci-period" class="w-16 px-1 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+              <option value="AM">AM</option><option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-3 mb-4">
+        <div>
+          <label class="block text-sm font-medium text-slate-600 mb-1">Clock-Out Date</label>
+          <input type="date" id="form-shift-co-date" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-600 mb-1">Clock-Out Time</label>
+          <div class="flex gap-1">
+            <select id="form-shift-co-hour" class="w-14 px-1 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+              <option value="12">12</option><option value="01">01</option><option value="02">02</option><option value="03">03</option>
+              <option value="04">04</option><option value="05">05</option><option value="06">06</option><option value="07">07</option>
+              <option value="08">08</option><option value="09">09</option><option value="10">10</option><option value="11">11</option>
+            </select>
+            <span class="self-center text-slate-400">:</span>
+            <select id="form-shift-co-minute" class="w-14 px-1 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+              <option value="00">00</option><option value="05">05</option><option value="10">10</option><option value="15">15</option>
+              <option value="20">20</option><option value="25">25</option><option value="30">30</option><option value="35">35</option>
+              <option value="40">40</option><option value="45">45</option><option value="50">50</option><option value="55">55</option>
+            </select>
+            <select id="form-shift-co-period" class="w-16 px-1 py-2.5 border border-slate-300 rounded-lg text-sm bg-white form-select">
+              <option value="AM">AM</option><option value="PM">PM</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3 justify-end">
+        <button type="button" class="btn-ghost" onclick="closeModal('modal-shift')">Cancel</button>
+        <button type="submit" class="btn-primary text-sm">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+JAVASCRIPT
+════════════════════════════════════════════════════════════ -->
+<script>
+  /* ─── State ─── */
+  let state = {
+    token: localStorage.getItem('token'),
+    employeeId: null,
+    isAdmin: false,
+    employeeName: '',
+    weeklyChart: null,
+    monthlyChart: null,
+    adminWeeklyChart: null,
+    adminMonthlyChart: null,
+  };
+
+  /* ─── API ─── */
+  async function api(path, options = {}) {
+    const headers = { 'Content-Type': 'application/json', ...options.headers };
+    if (state.token) {
+      headers['Authorization'] = `Bearer ${state.token}`;
+    }
+    const res = await fetch(path, { ...options, headers });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.detail || `Request failed (${res.status})`);
+    }
+    return res.json();
+  }
+
+  /* ─── Time Helpers ─── */
+  function getTimeValue() {
+    const h = document.getElementById('time-hour').value;
+    const m = document.getElementById('time-minute').value;
+    const p = document.getElementById('time-period').value;
+    return `${h}:${m} ${p}`;
+  }
+
+  function getDateTimeFromSelects(hourId, minId, perId, dateId) {
+    const h = document.getElementById(hourId).value;
+    const m = document.getElementById(minId).value;
+    const p = document.getElementById(perId).value;
+    const d = document.getElementById(dateId).value;
+    return { date: d, time: `${h}:${m} ${p}` };
+  }
+
+  function setDefaultTime() {
+    const now = new Date();
+    let h = now.getHours();
+    const m = now.getMinutes();
+    const p = h >= 12 ? 'PM' : 'AM';
+    if (h > 12) h -= 12;
+    if (h === 0) h = 12;
+    const hh = h < 10 ? '0' + h : '' + h;
+    document.getElementById('time-hour').value = hh;
+    const mm = Math.floor(m / 5) * 5;
+    document.getElementById('time-minute').value = mm < 10 ? '0' + mm : '' + mm;
+    document.getElementById('time-period').value = p;
+  }
+
+  function setDefaultDate() {
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('shift-date').value = today;
+  }
+
+  function getTimeString(hour, minute, period, dateVal) {
+    return { date: dateVal, time: `${hour}:${minute} ${period}` };
+  }
+
+  /* ─── Modal Helpers ─── */
+  function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+
+  function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+  function showAlert(msg) {
+    document.getElementById('modal-alert-msg').textContent = msg;
+    openModal('modal-alert');
+  }
+
+  document.getElementById('modal-alert-ok').addEventListener('click', () => closeModal('modal-alert'));
+
+  /* ─── View Management ─── */
+  function showView(viewId) {
+    ['login-view', 'employee-view', 'admin-view'].forEach(id => {
+      document.getElementById(id).classList.add('hidden');
+    });
+    document.getElementById(viewId).classList.remove('hidden');
+  }
+
+  /* ─── Login ─── */
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    errEl.classList.add('hidden');
+    try {
+      const data = await api('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ password }),
+      });
+      state.token = data.access_token;
+      state.employeeId = data.employee_id;
+      state.isAdmin = data.is_admin;
+      state.employeeName = data.name;
+      localStorage.setItem('token', state.token);
+      if (data.is_admin) {
+        initAdmin();
+      } else {
+        initEmployee();
+      }
+    } catch (err) {
+      errEl.textContent = err.message;
+      errEl.classList.remove('hidden');
+    }
+  });
+
+  /* ─── Employee ─── */
+  async function initEmployee() {
+    showView('employee-view');
+    document.getElementById('emp-name').textContent = state.employeeName;
+    setDefaultDate();
+    setDefaultTime();
+    await loadEmployeeData();
+  }
+
+  async function loadEmployeeData() {
+    try {
+      const me = await api('/api/employee/me');
+      document.getElementById('emp-site').textContent = me.today_site ? `Assigned: ${me.today_site}` : 'No site assigned today';
+
+      const active = await api('/api/employee/active-shift');
+      const banner = document.getElementById('active-shift-banner');
+      const startBtn = document.getElementById('btn-start-shift');
+      const endBtn = document.getElementById('btn-end-shift');
+      if (active.active) {
+        banner.classList.remove('hidden');
+        document.getElementById('active-clock-in').textContent = active.clock_in;
+        startBtn.disabled = true;
+        startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        endBtn.disabled = false;
+        endBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        banner.classList.add('hidden');
+        startBtn.disabled = false;
+        startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        endBtn.disabled = true;
+        endBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+
+      await loadEmployeeCharts();
+      await loadEmployeeShifts();
+    } catch (err) {
+      showAlert(err.message);
+    }
+  }
+
+  async function loadEmployeeCharts() {
+    try {
+      const weekData = await api('/api/employee/hours/week');
+      const monthData = await api('/api/employee/hours/month');
+
+      if (state.weeklyChart) { state.weeklyChart.destroy(); }
+      if (state.monthlyChart) { state.monthlyChart.destroy(); }
+
+      const colors = ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe', '#e0e7ff', '#eef2ff'];
+
+      state.weeklyChart = new Chart(document.getElementById('weekly-chart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(weekData),
+          datasets: [{
+            label: 'Hours',
+            data: Object.values(weekData),
+            backgroundColor: colors,
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
+          }
+        }
+      });
+
+      state.monthlyChart = new Chart(document.getElementById('monthly-chart'), {
+        type: 'bar',
+        data: {
+          labels: monthData.labels,
+          datasets: [{
+            label: 'Hours',
+            data: monthData.data,
+            backgroundColor: ['#4f46e5', '#6366f1', '#818cf8', '#a5b4fc', '#c7d2fe'],
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
+          }
+        }
+      });
+    } catch (err) { /* noop */ }
+  }
+
+  async function loadEmployeeShifts() {
+    try {
+      const shifts = await api('/api/employee/shifts');
+      const tbody = document.getElementById('emp-shifts-body');
+      const empty = document.getElementById('emp-shifts-empty');
+      tbody.innerHTML = '';
+      if (shifts.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      shifts.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'text-slate-600';
+        tr.innerHTML = `
+          <td class="py-2.5 pr-3">${s.date}</td>
+          <td class="py-2.5 pr-3">${s.clock_in}</td>
+          <td class="py-2.5 pr-3">${s.clock_out || '—'}</td>
+          <td class="py-2.5 pr-3 font-medium">${s.hours != null ? s.hours.toFixed(2) : '—'}</td>
+          <td class="py-2.5">${s.site || '—'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) { /* noop */ }
+  }
+
+  /* Employee - Start Shift */
+  document.getElementById('btn-start-shift').addEventListener('click', async () => {
+    const date = document.getElementById('shift-date').value;
+    const time = getTimeValue();
+    const msgEl = document.getElementById('shift-message');
+    try {
+      const result = await api('/api/employee/clock-in', {
+        method: 'POST',
+        body: JSON.stringify({ date, time }),
+      });
+      msgEl.textContent = result.message || 'Shift started!';
+      msgEl.className = 'mt-3 text-sm text-emerald-600 font-medium';
+      await loadEmployeeData();
+    } catch (err) {
+      msgEl.textContent = err.message;
+      msgEl.className = 'mt-3 text-sm text-red-500 font-medium';
+    }
+  });
+
+  /* Employee - End Shift */
+  document.getElementById('btn-end-shift').addEventListener('click', async () => {
+    const date = document.getElementById('shift-date').value;
+    const time = getTimeValue();
+    const msgEl = document.getElementById('shift-message');
+    try {
+      const result = await api('/api/employee/clock-out', {
+        method: 'POST',
+        body: JSON.stringify({ date, time }),
+      });
+      msgEl.textContent = `Shift ended — ${result.hours.toFixed(2)} hours worked`;
+      msgEl.className = 'mt-3 text-sm text-emerald-600 font-medium';
+      await loadEmployeeData();
+    } catch (err) {
+      msgEl.textContent = err.message;
+      msgEl.className = 'mt-3 text-sm text-red-500 font-medium';
+    }
+  });
+
+  /* Employee - Logout */
+  document.getElementById('emp-logout').addEventListener('click', logout);
+
+  /* ─── Admin ─── */
+  async function initAdmin() {
+    showView('admin-view');
+    await loadAdminData();
+    await loadAdminEmployees();
+    await loadAdminSites();
+    await loadAdminSchedules();
+  }
+
+  /* Tab switching */
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active', 'text-indigo-600', 'border-indigo-600');
+        b.classList.add('text-slate-500');
+        b.style.borderBottom = '2px solid transparent';
+      });
+      btn.classList.add('active', 'text-indigo-600', 'border-indigo-600');
+      btn.style.borderBottom = '2px solid #4f46e5';
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
+      document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
+      if (btn.dataset.tab === 'overview') loadAdminDashboard();
+    });
+  });
+
+  async function loadAdminData() {
+    // populate filter dropdowns
+    try {
+      const employees = await api('/api/admin/employees');
+      const empFilter = document.getElementById('filter-employee');
+      const schedEmp = document.getElementById('sched-employee');
+      const shiftEmp = document.getElementById('form-shift-employee');
+      empFilter.innerHTML = '<option value="">All Employees</option>';
+      schedEmp.innerHTML = '<option value="">Select Employee</option>';
+      shiftEmp.innerHTML = '<option value="">Select</option>';
+      employees.forEach(e => {
+        if (!e.is_admin && e.active) {
+          empFilter.innerHTML += `<option value="${e.id}">${e.name}</option>`;
+          schedEmp.innerHTML += `<option value="${e.id}">${e.name}</option>`;
+          shiftEmp.innerHTML += `<option value="${e.id}">${e.name}</option>`;
+        }
+      });
+    } catch (err) { /* noop */ }
+    await loadAdminDashboard();
+  }
+
+  async function loadAdminDashboard() {
+    try {
+      const data = await api('/api/admin/dashboard');
+      document.getElementById('stat-active').textContent = data.active_shifts;
+      document.getElementById('stat-employees').textContent = data.total_employees;
+
+      const names = Object.keys(data.weekly_hours);
+      const weekVals = Object.values(data.weekly_hours);
+      const monthVals = Object.values(data.monthly_hours);
+
+      if (state.adminWeeklyChart) state.adminWeeklyChart.destroy();
+      if (state.adminMonthlyChart) state.adminMonthlyChart.destroy();
+
+      state.adminWeeklyChart = new Chart(document.getElementById('admin-weekly-chart'), {
+        type: 'bar',
+        data: {
+          labels: names,
+          datasets: [{
+            label: 'Weekly Hours',
+            data: weekVals,
+            backgroundColor: '#4f46e5',
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, title: { display: true, text: 'Hours' } } }
+        }
+      });
+
+      state.adminMonthlyChart = new Chart(document.getElementById('admin-monthly-chart'), {
+        type: 'bar',
+        data: {
+          labels: names,
+          datasets: [{
+            label: 'Monthly Hours',
+            data: monthVals,
+            backgroundColor: '#6366f1',
+            borderRadius: 4,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: { y: { beginAtZero: true, title: { display: true, text: 'Hours' } } }
+        }
+      });
+    } catch (err) { showAlert(err.message); }
+  }
+
+  /* Admin - Shifts */
+  async function loadAdminShifts() {
+    try {
+      const empId = document.getElementById('filter-employee').value;
+      const from = document.getElementById('filter-date-from').value;
+      const to = document.getElementById('filter-date-to').value;
+      let url = '/api/admin/shifts?';
+      if (empId) url += `employee_id=${empId}&`;
+      if (from) url += `date_from=${from}&`;
+      if (to) url += `date_to=${to}&`;
+      const shifts = await api(url);
+      const tbody = document.getElementById('admin-shifts-body');
+      const empty = document.getElementById('admin-shifts-empty');
+      tbody.innerHTML = '';
+      if (shifts.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      shifts.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'text-slate-600';
+        tr.innerHTML = `
+          <td class="py-2.5 pr-3 font-medium text-slate-700">${s.employee_name}</td>
+          <td class="py-2.5 pr-3">${s.date}</td>
+          <td class="py-2.5 pr-3">${s.clock_in}</td>
+          <td class="py-2.5 pr-3">${s.clock_out || '—'}</td>
+          <td class="py-2.5 pr-3 font-medium">${s.hours != null ? s.hours.toFixed(2) : '—'}</td>
+          <td class="py-2.5 pr-3">${s.site || '—'}</td>
+          <td class="py-2.5">
+            <button class="text-indigo-600 hover:text-indigo-800 text-xs font-medium mr-2" onclick="editShift(${s.id})">Edit</button>
+            <button class="text-red-500 hover:text-red-700 text-xs font-medium" onclick="deleteShift(${s.id})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) { showAlert(err.message); }
+  }
+
+  document.getElementById('btn-filter-shifts').addEventListener('click', loadAdminShifts);
+
+  document.getElementById('btn-add-shift').addEventListener('click', () => {
+    document.getElementById('modal-shift-title').textContent = 'Add Shift';
+    document.getElementById('form-shift-id').value = '';
+    document.getElementById('form-shift-employee').value = '';
+    document.getElementById('form-shift-site').value = '';
+    document.getElementById('form-shift-ci-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('form-shift-ci-hour').value = '08';
+    document.getElementById('form-shift-ci-minute').value = '00';
+    document.getElementById('form-shift-ci-period').value = 'AM';
+    document.getElementById('form-shift-co-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('form-shift-co-hour').value = '05';
+    document.getElementById('form-shift-co-minute').value = '00';
+    document.getElementById('form-shift-co-period').value = 'PM';
+    openModal('modal-shift');
+  });
+
+  async function editShift(id) {
+    try {
+      const shifts = await api('/api/admin/shifts');
+      const s = shifts.find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('modal-shift-title').textContent = 'Edit Shift';
+      document.getElementById('form-shift-id').value = s.id;
+      document.getElementById('form-shift-employee').value = s.employee_id;
+      document.getElementById('form-shift-site').value = s.site_name || '';
+
+      const ciParts = s.clock_in.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
+      if (ciParts) {
+        document.getElementById('form-shift-ci-hour').value = ciParts[1].padStart(2, '0');
+        document.getElementById('form-shift-ci-minute').value = ciParts[2];
+        document.getElementById('form-shift-ci-period').value = ciParts[3];
+      }
+      document.getElementById('form-shift-ci-date').value = s.date;
+
+      if (s.clock_out) {
+        const coParts = s.clock_out.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
+        if (coParts) {
+          document.getElementById('form-shift-co-hour').value = coParts[1].padStart(2, '0');
+          document.getElementById('form-shift-co-minute').value = coParts[2];
+          document.getElementById('form-shift-co-period').value = coParts[3];
+        }
+      } else {
+        document.getElementById('form-shift-co-hour').value = '05';
+        document.getElementById('form-shift-co-minute').value = '00';
+        document.getElementById('form-shift-co-period').value = 'PM';
+      }
+      document.getElementById('form-shift-co-date').value = s.date;
+      openModal('modal-shift');
+    } catch (err) { showAlert(err.message); }
+  }
+  window.editShift = editShift;
+
+  async function deleteShift(id) {
+    if (!confirm('Delete this shift?')) return;
+    try {
+      await api(`/api/admin/shifts/${id}`, { method: 'DELETE' });
+      await loadAdminShifts();
+    } catch (err) { showAlert(err.message); }
+  }
+  window.deleteShift = deleteShift;
+
+  document.getElementById('form-shift').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('form-shift-id').value;
+    const employee_id = document.getElementById('form-shift-employee').value;
+    const siteEl = document.getElementById('form-shift-site');
+    const siteElValue = siteEl.value;
+    let site_id = null;
+    // Look up site_id from the sites list by name
+    if (siteElValue) {
+      try {
+        const sites = await api('/api/admin/sites');
+        const match = sites.find(s => s.name === siteElValue);
+        if (match) site_id = match.id;
+      } catch (e) { /* ignore */ }
+      if (!site_id && siteElValue) {
+        // Try to find via selected option text
+        const opt = siteEl.options[siteEl.selectedIndex];
+        if (opt && opt.text && opt.value) {
+          site_id = parseInt(opt.value);
+        }
+      }
+    }
+
+    const ci = getDateTimeFromSelects('form-shift-ci-hour', 'form-shift-ci-minute', 'form-shift-ci-period', 'form-shift-ci-date');
+    let coDate = document.getElementById('form-shift-co-date').value;
+    let coHour = document.getElementById('form-shift-co-hour').value;
+    let coMin = document.getElementById('form-shift-co-minute').value;
+    let coPer = document.getElementById('form-shift-co-period').value;
+    const body = {
+      employee_id: parseInt(employee_id),
+      site_id: site_id,
+      clock_in_date: ci.date,
+      clock_in_time: ci.time,
+      clock_out_date: coDate || null,
+      clock_out_time: coDate ? `${coHour}:${coMin} ${coPer}` : null,
+    };
+
+    try {
+      if (id) {
+        await api(`/api/admin/shifts/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+      } else {
+        await api('/api/admin/shifts', { method: 'POST', body: JSON.stringify(body) });
+      }
+      closeModal('modal-shift');
+      await loadAdminShifts();
+    } catch (err) { showAlert(err.message); }
+  });
+
+  /* Admin - Employees */
+  async function loadAdminEmployees() {
+    try {
+      const employees = await api('/api/admin/employees');
+      const tbody = document.getElementById('admin-employees-body');
+      tbody.innerHTML = '';
+      employees.forEach(e => {
+        if (e.is_admin) return;
+        const tr = document.createElement('tr');
+        tr.className = 'text-slate-600';
+        tr.innerHTML = `
+          <td class="py-2.5 pr-3 font-medium text-slate-700">${e.name}</td>
+          <td class="py-2.5 pr-3">${e.is_admin ? 'Admin' : 'Employee'}</td>
+          <td class="py-2.5 pr-3">
+            <span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium ${e.active ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}">
+              ${e.active ? 'Active' : 'Inactive'}
+            </span>
+          </td>
+          <td class="py-2.5">
+            <button class="text-indigo-600 hover:text-indigo-800 text-xs font-medium mr-2" onclick="editEmployee(${e.id}, '${e.name}')">Edit</button>
+            <button class="text-red-500 hover:text-red-700 text-xs font-medium" onclick="deleteEmployee(${e.id})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) { showAlert(err.message); }
+  }
+
+  document.getElementById('btn-add-employee').addEventListener('click', () => {
+    document.getElementById('modal-employee-title').textContent = 'Add Employee';
+    document.getElementById('form-employee-id').value = '';
+    document.getElementById('form-employee-name').value = '';
+    document.getElementById('form-employee-password').value = '';
+    document.getElementById('form-employee-password').required = true;
+    document.getElementById('emp-pass-hint').textContent = '';
+    openModal('modal-employee');
+  });
+
+  function editEmployee(id, name) {
+    document.getElementById('modal-employee-title').textContent = 'Edit Employee';
+    document.getElementById('form-employee-id').value = id;
+    document.getElementById('form-employee-name').value = name;
+    document.getElementById('form-employee-password').value = '';
+    document.getElementById('form-employee-password').required = false;
+    document.getElementById('emp-pass-hint').textContent = '(leave blank to keep current)';
+    openModal('modal-employee');
+  }
+  window.editEmployee = editEmployee;
+
+  async function deleteEmployee(id) {
+    if (!confirm('Delete this employee? This will also delete their shift records.')) return;
+    try {
+      await api(`/api/admin/employees/${id}`, { method: 'DELETE' });
+      await loadAdminEmployees();
+      await loadAdminData();
+    } catch (err) { showAlert(err.message); }
+  }
+  window.deleteEmployee = deleteEmployee;
+
+  document.getElementById('form-employee').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('form-employee-id').value;
+    const name = document.getElementById('form-employee-name').value;
+    const password = document.getElementById('form-employee-password').value;
+    try {
+      if (id) {
+        const body = { name };
+        if (password) body.password = password;
+        await api(`/api/admin/employees/${id}`, { method: 'PUT', body: JSON.stringify(body) });
+      } else {
+        await api('/api/admin/employees', { method: 'POST', body: JSON.stringify({ name, password }) });
+      }
+      closeModal('modal-employee');
+      await loadAdminEmployees();
+      await loadAdminData();
+    } catch (err) { showAlert(err.message); }
+  });
+
+  /* Admin - Sites */
+  async function loadAdminSites() {
+    try {
+      const sites = await api('/api/admin/sites');
+      const tbody = document.getElementById('admin-sites-body');
+      const siteSelect = document.getElementById('form-shift-site');
+      const schedSelect = document.getElementById('sched-site');
+      siteSelect.innerHTML = '<option value="">None</option>';
+      schedSelect.innerHTML = '<option value="">Select Site</option>';
+      tbody.innerHTML = '';
+      sites.forEach(s => {
+        siteSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+        schedSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
+        const tr = document.createElement('tr');
+        tr.className = 'text-slate-600';
+        tr.innerHTML = `
+          <td class="py-2.5 pr-3 font-medium text-slate-700">${s.name}</td>
+          <td class="py-2.5">
+            <button class="text-indigo-600 hover:text-indigo-800 text-xs font-medium mr-2" onclick="editSite(${s.id}, '${s.name.replace(/'/g, "\\'")}')">Edit</button>
+            <button class="text-red-500 hover:text-red-700 text-xs font-medium" onclick="deleteSite(${s.id})">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) { showAlert(err.message); }
+  }
+
+  document.getElementById('btn-add-site').addEventListener('click', () => {
+    document.getElementById('modal-site-title').textContent = 'Add Site';
+    document.getElementById('form-site-id').value = '';
+    document.getElementById('form-site-name').value = '';
+    openModal('modal-site');
+  });
+
+  function editSite(id, name) {
+    document.getElementById('modal-site-title').textContent = 'Edit Site';
+    document.getElementById('form-site-id').value = id;
+    document.getElementById('form-site-name').value = name;
+    openModal('modal-site');
+  }
+  window.editSite = editSite;
+
+  async function deleteSite(id) {
+    if (!confirm('Delete this site?')) return;
+    try {
+      await api(`/api/admin/sites/${id}`, { method: 'DELETE' });
+      await loadAdminSites();
+    } catch (err) { showAlert(err.message); }
+  }
+  window.deleteSite = deleteSite;
+
+  document.getElementById('form-site').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const id = document.getElementById('form-site-id').value;
+    const name = document.getElementById('form-site-name').value;
+    try {
+      if (id) {
+        await api(`/api/admin/sites/${id}`, { method: 'PUT', body: JSON.stringify({ name }) });
+      } else {
+        await api('/api/admin/sites', { method: 'POST', body: JSON.stringify({ name }) });
+      }
+      closeModal('modal-site');
+      await loadAdminSites();
+    } catch (err) { showAlert(err.message); }
+  });
+
+  /* Admin - Schedules */
+  async function loadAdminSchedules() {
+    try {
+      const schedules = await api('/api/admin/schedules');
+      const tbody = document.getElementById('admin-schedules-body');
+      const empty = document.getElementById('admin-schedules-empty');
+      tbody.innerHTML = '';
+      if (schedules.length === 0) {
+        empty.classList.remove('hidden');
+        return;
+      }
+      empty.classList.add('hidden');
+      schedules.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'text-slate-600';
+        tr.innerHTML = `
+          <td class="py-2.5 pr-3 font-medium text-slate-700">${s.employee_name}</td>
+          <td class="py-2.5 pr-3">${s.site_name}</td>
+          <td class="py-2.5 pr-3">${s.date}</td>
+          <td class="py-2.5">
+            <button class="text-red-500 hover:text-red-700 text-xs font-medium" onclick="deleteSchedule(${s.id})">Remove</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    } catch (err) { showAlert(err.message); }
+  }
+
+  document.getElementById('btn-add-schedule').addEventListener('click', async () => {
+    const empId = document.getElementById('sched-employee').value;
+    const siteId = document.getElementById('sched-site').value;
+    const date = document.getElementById('sched-date').value;
+    if (!empId || !siteId || !date) {
+      showAlert('Please select employee, site, and date.');
+      return;
+    }
+    try {
+      await api('/api/admin/schedules', {
+        method: 'POST',
+        body: JSON.stringify({ employee_id: parseInt(empId), site_id: parseInt(siteId), date }),
+      });
+      document.getElementById('sched-employee').value = '';
+      document.getElementById('sched-site').value = '';
+      document.getElementById('sched-date').value = '';
+      await loadAdminSchedules();
+    } catch (err) { showAlert(err.message); }
+  });
+
+  async function deleteSchedule(id) {
+    if (!confirm('Remove this schedule assignment?')) return;
+    try {
+      await api(`/api/admin/schedules/${id}`, { method: 'DELETE' });
+      await loadAdminSchedules();
+    } catch (err) { showAlert(err.message); }
+  }
+  window.deleteSchedule = deleteSchedule;
+
+  /* Admin - Logout */
+  document.getElementById('admin-logout').addEventListener('click', logout);
+
+  /* ─── Logout ─── */
+  function logout() {
+    state.token = null;
+    state.employeeId = null;
+    state.isAdmin = false;
+    state.employeeName = '';
+    localStorage.removeItem('token');
+    document.getElementById('login-password').value = '';
+    document.getElementById('login-error').classList.add('hidden');
+    showView('login-view');
+  }
+
+  /* ─── Init on Load ─── */
+  document.addEventListener('DOMContentLoaded', async () => {
+    if (state.token) {
+      try {
+        const me = await api('/api/employee/me');
+        state.employeeId = me.id;
+        state.isAdmin = me.is_admin;
+        state.employeeName = me.name;
+        if (me.is_admin) {
+          await initAdmin();
+        } else {
+          await initEmployee();
+        }
+        return;
+      } catch (err) {
+        localStorage.removeItem('token');
+        state.token = null;
+      }
+    }
+    showView('login-view');
+  });
+
+  /* Populate time selects with current time on load */
+  setDefaultTime();
+  setDefaultDate();
+</script>
+
+</body>
+</html>
