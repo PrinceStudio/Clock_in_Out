@@ -46,6 +46,14 @@ class ShiftCreate(BaseModel):
     clock_out_time: Optional[str] = None
 
 
+class EmployeeShiftCreate(BaseModel):
+    site_id: Optional[int] = None
+    clock_in_date: str
+    clock_in_time: str
+    clock_out_date: Optional[str] = None
+    clock_out_time: Optional[str] = None
+
+
 class ShiftUpdate(BaseModel):
     clock_in_date: Optional[str] = None
     clock_in_time: Optional[str] = None
@@ -57,3 +65,4 @@ class ScheduleCreate(BaseModel):
     employee_id: int
     site_id: int
     date: str
+

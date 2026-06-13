@@ -14,7 +14,7 @@ from app.models import Employee, Site, Shift, Schedule
 from app.schemas import (
     LoginRequest, ClockActionRequest,
     EmployeeCreate, EmployeeUpdate, SiteCreate, SiteUpdate,
-    ShiftCreate, ShiftUpdate, ScheduleCreate,
+    ShiftCreate, ShiftUpdate, ScheduleCreate, EmployeeShiftCreate,
 )
 from app.auth import (
     verify_password, hash_password, create_access_token, get_current_user,
@@ -69,6 +69,19 @@ def require_admin(current_user=Depends(get_current_user)):
     return current_user
 
 
+def is_passcode_taken(password: str, db: Session, exclude_employee_id: Optional[int] = None) -> bool:
+    employees = db.query(Employee).filter(Employee.active == True)
+    if exclude_employee_id is not None:
+        employees = employees.filter(Employee.id != exclude_employee_id)
+    for emp in employees.all():
+        try:
+            if verify_password(password, emp.password_hash):
+                return True
+        except Exception:
+            continue
+    return False
+
+
 # ─── Auth ───
 
 @app.post("/api/auth/login")
@@ -103,25 +116,26 @@ def employee_me(current_user=Depends(get_current_user), db: Session = Depends(ge
         Schedule.date == today
     ).first()
     site_name = None
+    site_id = None
     if schedule:
         site = db.query(Site).filter(Site.id == schedule.site_id).first()
         if site:
             site_name = site.name
+            site_id = site.id
 
     return {
         "id": emp.id,
         "name": emp.name,
         "is_admin": emp.is_admin,
         "today_site": site_name,
+        "today_site_id": site_id,
     }
 
 
 @app.get("/api/employee/active-shift")
 def active_shift(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
-    today = date.today()
     shift = db.query(Shift).filter(
         Shift.employee_id == current_user["employee_id"],
-        Shift.date == today,
         Shift.clock_out.is_(None),
     ).first()
     if not shift:
@@ -137,6 +151,8 @@ def active_shift(current_user=Depends(get_current_user), db: Session = Depends(g
         "clock_in": format_12hour(shift.clock_in),
         "clock_in_datetime": shift.clock_in.isoformat(),
         "site": site_name,
+        "site_id": shift.site_id,
+        "date": shift.date.isoformat(),
     }
 
 
@@ -189,12 +205,6 @@ def clock_out(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    try:
-        d = date.fromisoformat(req.date)
-        clock_out_dt = parse_12hour_time(req.time, d)
-    except (ValueError, TypeError):
-        raise HTTPException(status_code=400, detail="Invalid date or time format")
-
     shift = db.query(Shift).filter(
         Shift.employee_id == current_user["employee_id"],
         Shift.clock_out.is_(None),
@@ -202,8 +212,15 @@ def clock_out(
     if not shift:
         raise HTTPException(status_code=400, detail="No active shift found")
 
-    if clock_out_dt <= shift.clock_in:
+    try:
+        clock_out_dt = parse_12hour_time(req.time, shift.date)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=400, detail="Invalid date or time format")
+
+    if clock_out_dt < shift.clock_in:
         clock_out_dt += timedelta(days=1)
+    elif clock_out_dt == shift.clock_in:
+        raise HTTPException(status_code=400, detail="Clock-out time must be after clock-in time")
 
     shift.clock_out = clock_out_dt
     db.commit()
@@ -311,6 +328,84 @@ def employee_shifts(
     return result
 
 
+@app.get("/api/employee/sites")
+def employee_sites(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    sites = db.query(Site).filter(Site.active == True).order_by(Site.name).all()
+    return [{"id": s.id, "name": s.name} for s in sites]
+
+
+@app.post("/api/employee/shifts")
+def employee_create_shift(
+    req: EmployeeShiftCreate,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        ci_date = date.fromisoformat(req.clock_in_date)
+        ci_dt = parse_12hour_time(req.clock_in_time, ci_date)
+    except (ValueError, TypeError):
+        raise HTTPException(status_code=400, detail="Invalid clock-in date or time")
+
+    co_dt = None
+    if req.clock_out_date and req.clock_out_time:
+        try:
+            co_date = date.fromisoformat(req.clock_out_date)
+            co_dt = parse_12hour_time(req.clock_out_time, co_date)
+        except (ValueError, TypeError):
+            raise HTTPException(status_code=400, detail="Invalid clock-out date or time")
+        if co_dt <= ci_dt:
+            raise HTTPException(status_code=400, detail="Clock-out time must be after clock-in time")
+
+    # Check for active shift
+    active_shift = db.query(Shift).filter(
+        Shift.employee_id == current_user["employee_id"],
+        Shift.clock_out.is_(None),
+    ).first()
+
+    if active_shift:
+        if co_dt:
+            active_shift.site_id = req.site_id
+            active_shift.clock_in = ci_dt
+            active_shift.clock_out = co_dt
+            active_shift.date = ci_date
+            db.commit()
+            db.refresh(active_shift)
+            hours = round((co_dt - ci_dt).total_seconds() / 3600, 2)
+            return {
+                "id": active_shift.id,
+                "clock_in": format_12hour(active_shift.clock_in),
+                "clock_out": format_12hour(active_shift.clock_out),
+                "hours": hours,
+                "message": "Active shift updated and completed",
+            }
+        else:
+            raise HTTPException(status_code=400, detail="Already have an active shift. Please specify a clock-out time to complete it.")
+
+    # Create new shift
+    shift = Shift(
+        employee_id=current_user["employee_id"],
+        site_id=req.site_id,
+        clock_in=ci_dt,
+        clock_out=co_dt,
+        date=ci_date,
+    )
+    db.add(shift)
+    db.commit()
+    db.refresh(shift)
+
+    hours = None
+    if co_dt:
+        hours = round((co_dt - ci_dt).total_seconds() / 3600, 2)
+
+    return {
+        "id": shift.id,
+        "clock_in": format_12hour(shift.clock_in),
+        "clock_out": format_12hour(shift.clock_out) if shift.clock_out else None,
+        "hours": hours,
+        "message": "Shift logged successfully",
+    }
+
+
 # ─── Admin: Dashboard ───
 
 @app.get("/api/admin/dashboard")
@@ -392,6 +487,8 @@ def admin_create_employee(
     existing = db.query(Employee).filter(Employee.name == req.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Employee name already exists")
+    if is_passcode_taken(req.password, db):
+        raise HTTPException(status_code=400, detail="Passcode is already in use by another active employee")
     emp = Employee(
         name=req.name,
         password_hash=hash_password(req.password),
@@ -417,6 +514,8 @@ def admin_update_employee(
     if req.name is not None:
         emp.name = req.name
     if req.password is not None:
+        if is_passcode_taken(req.password, db, exclude_employee_id=employee_id):
+            raise HTTPException(status_code=400, detail="Passcode is already in use by another active employee")
         emp.password_hash = hash_password(req.password)
     db.commit()
     return {"id": emp.id, "name": emp.name, "message": "Employee updated"}
@@ -555,6 +654,8 @@ def admin_create_shift(
             co_dt = parse_12hour_time(req.clock_out_time, co_date)
         except (ValueError, TypeError):
             raise HTTPException(status_code=400, detail="Invalid clock-out date or time")
+        if co_dt <= ci_dt:
+            raise HTTPException(status_code=400, detail="Clock-out time must be after clock-in time")
 
     shift = Shift(
         employee_id=req.employee_id,
@@ -591,22 +692,33 @@ def admin_update_shift(
     if not shift:
         raise HTTPException(status_code=404, detail="Shift not found")
 
+    temp_ci = shift.clock_in
+    temp_co = shift.clock_out
+    temp_date = shift.date
+
     if req.clock_in_date and req.clock_in_time:
         try:
             ci_date = date.fromisoformat(req.clock_in_date)
-            shift.clock_in = parse_12hour_time(req.clock_in_time, ci_date)
-            shift.date = ci_date
+            temp_ci = parse_12hour_time(req.clock_in_time, ci_date)
+            temp_date = ci_date
         except (ValueError, TypeError):
             raise HTTPException(status_code=400, detail="Invalid clock-in date or time")
 
     if req.clock_out_date and req.clock_out_time:
         try:
             co_date = date.fromisoformat(req.clock_out_date)
-            shift.clock_out = parse_12hour_time(req.clock_out_time, co_date)
+            temp_co = parse_12hour_time(req.clock_out_time, co_date)
         except (ValueError, TypeError):
             raise HTTPException(status_code=400, detail="Invalid clock-out date or time")
     elif req.clock_out_date == "" or req.clock_out_time == "":
-        shift.clock_out = None
+        temp_co = None
+
+    if temp_co and temp_co <= temp_ci:
+        raise HTTPException(status_code=400, detail="Clock-out time must be after clock-in time")
+
+    shift.clock_in = temp_ci
+    shift.clock_out = temp_co
+    shift.date = temp_date
 
     db.commit()
     db.refresh(shift)
