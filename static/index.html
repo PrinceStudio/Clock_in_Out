@@ -398,17 +398,7 @@
             <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between space-y-5">
               <div class="space-y-4">
                 <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Session Tracker</h3>
-                <p class="text-xs text-slate-400">Select a project and track your work session in real-time.</p>
-                <div>
-                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Project / Category</label>
-                  <select id="clock-task-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select font-semibold">
-                    <option value="Product Development">Product Development</option>
-                    <option value="UI/UX Design">UI/UX Design</option>
-                    <option value="Customer Support">Customer Support</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Administrative">Administrative</option>
-                  </select>
-                </div>
+                <p class="text-xs text-slate-400">Track your work session in real-time.</p>
               </div>
               
               <!-- Timer block -->
@@ -1000,109 +990,22 @@
             <option value="">Select</option>
           </select>
         </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">Clock-In Date</label>
-            <input type="date" id="form-shift-ci-date" required
-              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">Clock-In Time</label>
-            <div class="flex gap-1">
-              <select id="form-shift-ci-hour"
-                class="w-14 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
-                <option value="12">12</option>
-                <option value="01">01</option>
-                <option value="02">02</option>
-                <option value="03">03</option>
-                <option value="04">04</option>
-                <option value="05">05</option>
-                <option value="06">06</option>
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-              </select>
-              <span class="self-center text-slate-400 text-xs">:</span>
-              <select id="form-shift-ci-minute"
-                class="w-14 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
-                <option value="00">00</option>
-                <option value="05">05</option>
-                <option value="10">10</option>
-                <option value="15">15</option>
-                <option value="20">20</option>
-                <option value="25">25</option>
-                <option value="30">30</option>
-                <option value="35">35</option>
-                <option value="40">40</option>
-                <option value="45">45</option>
-                <option value="50">50</option>
-                <option value="55">55</option>
-              </select>
-              <select id="form-shift-ci-period"
-                class="w-16 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">Clock-Out Date</label>
-            <input type="date" id="form-shift-co-date"
-              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-500 mb-1">Clock-Out Time</label>
-            <div class="flex gap-1">
-              <select id="form-shift-co-hour"
-                class="w-14 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
-                <option value="12">12</option>
-                <option value="01">01</option>
-                <option value="02">02</option>
-                <option value="03">03</option>
-                <option value="04">04</option>
-                <option value="05">05</option>
-                <option value="06">06</option>
-                <option value="07">07</option>
-                <option value="08">08</option>
-                <option value="09">09</option>
-                <option value="10">10</option>
-                <option value="11">11</option>
-              </select>
-              <span class="self-center text-slate-400 text-xs">:</span>
-              <select id="form-shift-co-minute"
-                class="w-14 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
-                <option value="00">00</option>
-                <option value="05">05</option>
-                <option value="10">10</option>
-                <option value="15">15</option>
-                <option value="20">20</option>
-                <option value="25">25</option>
-                <option value="30">30</option>
-                <option value="35">35</option>
-                <option value="40">40</option>
-                <option value="45">45</option>
-                <option value="50">50</option>
-                <option value="55">55</option>
-              </select>
-              <select id="form-shift-co-period"
-                class="w-16 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
-                <option value="AM">AM</option>
-                <option value="PM">PM</option>
-              </select>
-            </div>
-          </div>
-        </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-500 mb-1">Shift Type (Checkpoint)</label>
-          <select id="form-shift-type" required
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
-            <option value="Day">Day Shift</option>
-            <option value="Night">Night Shift</option>
-          </select>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Date</label>
+          <input type="date" id="form-shift-date" required
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Start Time</label>
+            <input type="time" id="form-shift-start" value="08:00" required
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">End Time</label>
+            <input type="time" id="form-shift-end" value="17:00"
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+          </div>
         </div>
         <div class="flex gap-3 justify-end pt-2">
           <button type="button" class="btn-ghost text-xs" onclick="closeModal('modal-shift')">Cancel</button>
@@ -1387,12 +1290,13 @@
     }
 
     /* ─── Time & Date Helpers ─── */
-    function getDateTimeFromSelects(hourId, minId, perId, dateId) {
-      const h = document.getElementById(hourId).value;
-      const m = document.getElementById(minId).value;
-      const p = document.getElementById(perId).value;
-      const d = document.getElementById(dateId).value;
-      return { date: d, time: `${h}:${m} ${p}` };
+    function time24to12h(time24) {
+      if (!time24) return null;
+      const [h, m] = time24.split(':').map(Number);
+      const p = h >= 12 ? 'PM' : 'AM';
+      let h12 = h % 12;
+      if (h12 === 0) h12 = 12;
+      return `${h12.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')} ${p}`;
     }
 
     function getCurrentTime12h() {
@@ -1409,48 +1313,11 @@
       return new Date().toISOString().split('T')[0];
     }
 
-    function setDefaultTime() {
-      const now = new Date();
-      let h = now.getHours();
-      const m = now.getMinutes();
-      const p = h >= 12 ? 'PM' : 'AM';
-      if (h > 12) h -= 12;
-      if (h === 0) h = 12;
-      const hh = h < 10 ? '0' + h : '' + h;
-      const mm = Math.floor(m / 5) * 5;
-      const mmStr = mm < 10 ? '0' + mm : '' + mm;
-
-      const newCiHour = document.getElementById('form-shift-ci-hour');
-      if (newCiHour && !newCiHour.disabled) {
-        newCiHour.value = hh;
-        document.getElementById('form-shift-ci-minute').value = mmStr;
-        document.getElementById('form-shift-ci-period').value = p;
-      }
-    }
-
-    function setDefaultDate() {
-      const today = new Date().toISOString().split('T')[0];
-      const newCiDate = document.getElementById('form-shift-ci-date');
-      if (newCiDate && !newCiDate.disabled) {
-        newCiDate.value = today;
-      }
-    }
-
     function setDefaultReportDates(fromId, toId) {
       const today = new Date();
       const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
       document.getElementById(fromId).value = firstDay.toISOString().split('T')[0];
       document.getElementById(toId).value = today.toISOString().split('T')[0];
-    }
-
-    function autoDetectShiftType(hourId, perId, targetId) {
-      const h = parseInt(document.getElementById(hourId).value, 10);
-      const p = document.getElementById(perId).value;
-      let hour24 = h;
-      if (p === 'PM' && h !== 12) hour24 += 12;
-      if (p === 'AM' && h === 12) hour24 = 0;
-      const shiftType = (hour24 >= 6 && hour24 < 18) ? 'Day' : 'Night';
-      document.getElementById(targetId).value = shiftType;
     }
 
     /* ─── Modal Helpers ─── */
@@ -1617,7 +1484,6 @@
         const clockBtn = document.getElementById('btn-clock-action');
         const clockText = clockBtn.querySelector('span');
         const timerText = document.getElementById('running-timer');
-        const categorySelect = document.getElementById('clock-task-category');
 
         if (active.active) {
           banner.classList.remove('js-hidden');
@@ -1626,7 +1492,6 @@
 
           clockBtn.className = 'w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl transition text-base shadow-md flex items-center justify-center gap-2';
           clockText.textContent = 'Clock Out';
-          categorySelect.disabled = true;
 
           // Timer math
           const startTime = new Date(active.clock_in_datetime);
@@ -1649,7 +1514,6 @@
           document.getElementById('kpi-emp-shift-type').textContent = 'None';
           clockBtn.className = 'w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-base shadow-md flex items-center justify-center gap-2';
           clockText.textContent = 'Clock In';
-          categorySelect.disabled = false;
 
           if (window.timerInterval) clearInterval(window.timerInterval);
           timerText.textContent = '00:00:00';
@@ -1869,15 +1733,9 @@
       document.getElementById('admin-only-shift-field').classList.add('js-hidden');
       
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('form-shift-ci-date').value = today;
-      document.getElementById('form-shift-ci-hour').value = '08';
-      document.getElementById('form-shift-ci-minute').value = '00';
-      document.getElementById('form-shift-ci-period').value = 'AM';
-      document.getElementById('form-shift-co-date').value = today;
-      document.getElementById('form-shift-co-hour').value = '05';
-      document.getElementById('form-shift-co-minute').value = '00';
-      document.getElementById('form-shift-co-period').value = 'PM';
-      document.getElementById('form-shift-type').value = 'Day';
+      document.getElementById('form-shift-date').value = today;
+      document.getElementById('form-shift-start').value = '08:00';
+      document.getElementById('form-shift-end').value = '17:00';
       openModal('modal-shift');
     });
 
@@ -2210,15 +2068,9 @@
       document.getElementById('admin-only-shift-field').classList.remove('js-hidden');
       
       const today = new Date().toISOString().split('T')[0];
-      document.getElementById('form-shift-ci-date').value = today;
-      document.getElementById('form-shift-ci-hour').value = '08';
-      document.getElementById('form-shift-ci-minute').value = '00';
-      document.getElementById('form-shift-ci-period').value = 'AM';
-      document.getElementById('form-shift-co-date').value = today;
-      document.getElementById('form-shift-co-hour').value = '05';
-      document.getElementById('form-shift-co-minute').value = '00';
-      document.getElementById('form-shift-co-period').value = 'PM';
-      document.getElementById('form-shift-type').value = 'Day';
+      document.getElementById('form-shift-date').value = today;
+      document.getElementById('form-shift-start').value = '08:00';
+      document.getElementById('form-shift-end').value = '17:00';
       openModal('modal-shift');
     });
 
@@ -2232,28 +2084,18 @@
         document.getElementById('form-shift-employee').value = s.employee_id;
         document.getElementById('admin-only-shift-field').classList.remove('js-hidden');
 
-        const ciParts = s.clock_in.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
-        if (ciParts) {
-          document.getElementById('form-shift-ci-hour').value = ciParts[1].padStart(2, '0');
-          document.getElementById('form-shift-ci-minute').value = ciParts[2];
-          document.getElementById('form-shift-ci-period').value = ciParts[3];
+        function toTime24(clockStr) {
+          const m = clockStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
+          if (!m) return '08:00';
+          let h = parseInt(m[1], 10);
+          if (m[3] === 'PM' && h !== 12) h += 12;
+          if (m[3] === 'AM' && h === 12) h = 0;
+          return `${h.toString().padStart(2, '0')}:${m[2]}`;
         }
-        document.getElementById('form-shift-ci-date').value = s.date;
 
-        if (s.clock_out) {
-          const coParts = s.clock_out.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
-          if (coParts) {
-            document.getElementById('form-shift-co-hour').value = coParts[1].padStart(2, '0');
-            document.getElementById('form-shift-co-minute').value = coParts[2];
-            document.getElementById('form-shift-co-period').value = coParts[3];
-          }
-        } else {
-          document.getElementById('form-shift-co-hour').value = '05';
-          document.getElementById('form-shift-co-minute').value = '00';
-          document.getElementById('form-shift-co-period').value = 'PM';
-        }
-        document.getElementById('form-shift-co-date').value = s.date;
-        document.getElementById('form-shift-type').value = s.shift_type;
+        document.getElementById('form-shift-date').value = s.date;
+        document.getElementById('form-shift-start').value = toTime24(s.clock_in);
+        document.getElementById('form-shift-end').value = s.clock_out ? toTime24(s.clock_out) : '17:00';
         openModal('modal-shift');
       } catch (err) { showAlert(err.message); }
     }
@@ -2273,12 +2115,20 @@
     document.getElementById('form-shift').addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('form-shift-id').value;
-      const ci = getDateTimeFromSelects('form-shift-ci-hour', 'form-shift-ci-minute', 'form-shift-ci-period', 'form-shift-ci-date');
-      let coDate = document.getElementById('form-shift-co-date').value;
-      let coHour = document.getElementById('form-shift-co-hour').value;
-      let coMin = document.getElementById('form-shift-co-minute').value;
-      let coPer = document.getElementById('form-shift-co-period').value;
-      const shiftType = document.getElementById('form-shift-type').value;
+      const shiftDate = document.getElementById('form-shift-date').value;
+      const startTime24 = document.getElementById('form-shift-start').value;
+      const endTime24 = document.getElementById('form-shift-end').value;
+
+      const clockInTime = time24to12h(startTime24);
+      let clockOutTime = endTime24 ? time24to12h(endTime24) : null;
+      let clockOutDate = shiftDate;
+
+      // If end time <= start time, shift crosses midnight (night shift)
+      if (clockOutTime && endTime24 <= startTime24) {
+        const d = new Date(shiftDate);
+        d.setDate(d.getDate() + 1);
+        clockOutDate = d.toISOString().split('T')[0];
+      }
 
       // Conditional path depending on view context
       if (!document.getElementById('admin-only-shift-field').classList.contains('js-hidden')) {
@@ -2286,11 +2136,10 @@
         const employee_id = document.getElementById('form-shift-employee').value;
         const body = {
           employee_id: parseInt(employee_id),
-          clock_in_date: ci.date,
-          clock_in_time: ci.time,
-          clock_out_date: coDate || null,
-          clock_out_time: coDate ? `${coHour}:${coMin} ${coPer}` : null,
-          shift_type: shiftType,
+          clock_in_date: shiftDate,
+          clock_in_time: clockInTime,
+          clock_out_date: clockOutDate,
+          clock_out_time: clockOutTime,
         };
         try {
           const url = id ? `/api/admin/shifts/${id}` : '/api/admin/shifts';
@@ -2302,11 +2151,10 @@
         } catch (err) { showAlert(err.message); }
       } else {
         const body = {
-          clock_in_date: ci.date,
-          clock_in_time: ci.time,
-          clock_out_date: coDate || null,
-          clock_out_time: coDate ? `${coHour}:${coMin} ${coPer}` : null,
-          shift_type: shiftType,
+          clock_in_date: shiftDate,
+          clock_in_time: clockInTime,
+          clock_out_date: clockOutDate,
+          clock_out_time: clockOutTime,
         };
         try {
           await api('/api/employee/shifts', { method: 'POST', body: JSON.stringify(body) });
@@ -2476,15 +2324,6 @@
 
     /* ─── Page Initialization and Binding ─── */
     async function init() {
-      // Add auto-detection listeners to log shift forms
-      const empHour = document.getElementById('form-shift-ci-hour');
-      const empPer = document.getElementById('form-shift-ci-period');
-      if (empHour && empPer) {
-        const updateEmpType = () => autoDetectShiftType('form-shift-ci-hour', 'form-shift-ci-period', 'form-shift-type');
-        empHour.addEventListener('change', updateEmpType);
-        empPer.addEventListener('change', updateEmpType);
-      }
-
       // Bind tabs routing
       document.querySelectorAll('.employee-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
@@ -2591,9 +2430,6 @@
     } else {
       init();
     }
-
-    setDefaultTime();
-    setDefaultDate();
   </script>
 
 </body>
