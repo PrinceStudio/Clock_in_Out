@@ -4,11 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clock In / Out</title>
-  <script src="https://cdn.tailwindcss.com">
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js">
-  </script>
+  <title>Timesheet & Analytics Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *,
     *::before,
@@ -16,24 +15,10 @@
       box-sizing: border-box;
     }
 
-    :root {
-      --bg-primary: #0a0d14;
-      --bg-surface: #141822;
-      --bg-surface-hover: #1e2535;
-      --border-color: #1f293d;
-      --text-primary: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent-indigo: #6366f1;
-      --accent-indigo-hover: #4f46e5;
-      --accent-cyan: #06b6d4;
-      --accent-success: #10b981;
-      --accent-danger: #ef4444;
-    }
-
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: var(--bg-primary);
-      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
+      color: #1e293b;
     }
 
     /* Custom scrollbar */
@@ -42,22 +27,66 @@
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: var(--bg-primary);
+      background: #f8fafc;
     }
     ::-webkit-scrollbar-thumb {
-      background: var(--border-color);
+      background: #cbd5e1;
       border-radius: 4px;
     }
     ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-muted);
+      background: #94a3b8;
     }
 
     .hidden {
+      display: none;
+    }
+
+    .js-hidden {
       display: none !important;
     }
 
+    .btn-primary {
+      background-color: #4f46e5;
+      color: #ffffff;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.1), 0 2px 4px -1px rgba(79, 70, 229, 0.06);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary:hover {
+      background-color: #4338ca;
+      box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.15), 0 4px 6px -2px rgba(79, 70, 229, 0.05);
+    }
+
+    .btn-ghost {
+      color: #475569;
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-ghost:hover {
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+
+    .sidebar-btn.active {
+      color: #4f46e5;
+      background-color: #e0e7ff;
+      font-weight: 600;
+    }
+
     .fade-in {
-      animation: fadeIn 0.2s ease-out;
+      animation: fadeIn 0.25s ease-out;
     }
 
     @keyframes fadeIn {
@@ -72,8 +101,8 @@
     }
 
     .modal-overlay {
-      background: rgba(5, 8, 15, 0.8);
-      backdrop-filter: blur(8px);
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
     }
 
     .chart-container {
@@ -94,7 +123,7 @@
     }
 
     select.form-select {
-      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
       background-repeat: no-repeat;
       background-position: right 0.75rem center;
       background-size: 12px;
@@ -104,144 +133,83 @@
     .sidebar-btn {
       width: 100%;
       display: flex;
-      items-center: center;
+      align-items: center;
       gap: 0.75rem;
       padding: 0.75rem 1rem;
-      border-radius: 0.75rem;
+      border-radius: 0.5rem;
       font-size: 0.875rem;
       font-weight: 500;
-      color: var(--text-muted);
+      color: #64748b;
       transition: all 0.2s;
     }
 
     .sidebar-btn:hover {
-      color: var(--text-primary);
-      background-color: var(--bg-surface-hover);
+      color: #1e293b;
+      background-color: #f1f5f9;
     }
 
     .sidebar-btn.active {
-      color: var(--text-primary);
-      background-color: rgba(99, 102, 241, 0.15);
-      border-left: 3px solid var(--accent-indigo);
-      border-top-left-radius: 0;
-      border-bottom-left-radius: 0;
+      color: #4f46e5;
+      background-color: #e0e7ff;
+      font-weight: 600;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-indigo-hover));
-      color: white;
-      padding: 0.625rem 1.25rem;
-      border-radius: 0.75rem;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
-      transition: all 0.2s;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(99, 102, 241, 0.25);
-    }
-
-    .btn-danger {
-      background: var(--accent-danger);
-      color: white;
-      padding: 0.625rem 1.25rem;
-      border-radius: 0.75rem;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
-      transition: all 0.2s;
-    }
-
-    .btn-danger:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(239, 68, 68, 0.25);
-    }
-
-    .btn-success {
-      background: var(--accent-success);
-      color: white;
-      padding: 0.625rem 1.25rem;
-      border-radius: 0.75rem;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
-      transition: all 0.2s;
-    }
-
-    .btn-success:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
-    }
-
-    .btn-ghost {
-      color: var(--text-muted);
-      padding: 0.625rem 1.25rem;
-      border-radius: 0.75rem;
-      font-weight: 500;
-      transition: all 0.2s;
-    }
-
-    .btn-ghost:hover {
-      background-color: var(--bg-surface-hover);
-      color: var(--text-primary);
-    }
-
-    .stat-card {
-      background-color: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      border-radius: 0.875rem;
-      padding: 1.25rem;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      transition: transform 0.2s;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-2px);
-    }
-
-    .table-wrap {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .table-wrap table {
-      min-width: 600px;
-    }
-
-    @media (max-width: 640px) {
-      .table-wrap table {
-        font-size: 0.8rem;
+    @media print {
+      body {
+        background-color: white !important;
+        color: black !important;
+      }
+      aside, header, nav, .print-hide, button, select, input {
+        display: none !important;
+      }
+      main {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .print-area {
+        display: block !important;
+        border: none !important;
+      }
+      table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+      th, td {
+        border-bottom: 1px solid #e2e8f0 !important;
+        padding: 8px !important;
+        color: black !important;
       }
     }
   </style>
 </head>
 
-<body class="antialiased min-h-screen flex flex-col">
+<body class="antialiased min-h-screen flex flex-col bg-slate-50">
 
   <!-- ════════════════════════════════════════════════════════════
   LOGIN VIEW
   ════════════════════════════════════════════════════════════ -->
-  <div id="login-view" class="min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-sm bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-2xl shadow-2xl p-8 fade-in text-[var(--text-primary)]">
+  <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-slate-100">
+    <div class="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-8 fade-in text-slate-800">
       <div class="text-center mb-8">
-        <div class="w-14 h-14 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-          <svg class="w-7 h-7 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="w-16 h-16 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 shadow-sm">
+          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-[var(--text-primary)]">Clock In / Out</h1>
-        <p class="text-[var(--text-muted)] text-sm mt-1">Enter your password to continue</p>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Timesheet Analytics</h1>
+        <p class="text-slate-500 text-sm mt-1">Enter your passcode to sign in to your workspace</p>
       </div>
       <form id="login-form">
         <div class="mb-6">
-          <label for="login-password" class="sr-only">Password</label>
-          <input id="login-password" type="password" placeholder="Enter password" required
+          <label for="login-password" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Passcode</label>
+          <input id="login-password" type="password" placeholder="••••••••" required
             autocomplete="current-password"
-            class="w-full px-4 py-3 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-base text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition" />
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm" />
         </div>
-        <p id="login-error" class="text-red-500 text-sm mb-3 hidden"></p>
+        <p id="login-error" class="text-rose-600 text-sm mb-4 hidden font-medium"></p>
         <button type="submit"
-          class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-base shadow-lg shadow-indigo-600/20 hover:shadow-indigo-600/30">
+          class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-base shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20">
           Sign In
         </button>
       </form>
@@ -251,41 +219,69 @@
   <!-- ════════════════════════════════════════════════════════════
   EMPLOYEE VIEW
   ════════════════════════════════════════════════════════════ -->
-  <div id="employee-view" class="hidden min-h-screen flex text-[var(--text-primary)] w-full">
+  <div id="employee-view" class="hidden min-h-screen flex text-slate-800 w-full">
     <!-- Left Sidebar -->
-    <aside class="w-64 bg-[var(--bg-surface)] border-r border-[var(--border-color)] flex flex-col justify-between p-5 sticky top-0 h-screen shrink-0 hidden md:flex">
-      <div>
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-5 sticky top-0 h-screen shrink-0 max-md:hidden flex">
+      <div class="space-y-6">
         <!-- Logo -->
-        <div class="flex items-center gap-3 mb-8 px-2">
-          <div class="w-10 h-10 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-3 px-2">
+          <div class="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <span class="font-bold text-lg text-[var(--text-primary)]">Clock In/Out</span>
+          <span class="font-bold text-lg text-slate-900 tracking-tight">Timesheet</span>
         </div>
         <!-- Menu -->
         <nav class="space-y-1">
-          <button class="sidebar-btn active">
+          <button class="sidebar-btn active employee-tab-btn" data-tab="dashboard">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
             </svg>
             Dashboard
           </button>
+          <button class="sidebar-btn employee-tab-btn" data-tab="reports">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            My Timesheets
+          </button>
+          <button class="sidebar-btn employee-tab-btn" data-tab="team-analytics">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            Team Analytics <span class="text-[9px] font-bold bg-amber-100 text-amber-800 px-1 py-0.5 rounded ml-auto">PRO</span>
+          </button>
+          <button class="sidebar-btn employee-tab-btn" data-tab="settings">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            Settings
+          </button>
         </nav>
       </div>
-      <!-- Footer Profile / Logout -->
-      <div>
-        <div class="flex items-center gap-3 mb-4 p-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl">
+      <!-- Footer Profile / Switching -->
+      <div class="space-y-4">
+        <!-- Switcher -->
+        <div id="switcher-container-emp" class="hidden pt-3 border-t border-slate-200">
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">View Role</label>
+          <select class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 form-select font-semibold" onchange="switchViewMode(this.value)" id="role-switcher-emp">
+            <option value="employee">Employee View</option>
+            <option value="admin">Admin View</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
           <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shrink-0" id="emp-avatar">
             E
           </div>
           <div class="truncate font-medium">
-            <p id="emp-sidebar-name" class="text-sm truncate">Employee</p>
-            <span class="text-[10px] text-[var(--text-muted)] block">Team Member</span>
+            <p id="emp-sidebar-name" class="text-sm text-slate-900 truncate">Employee</p>
+            <span class="text-[10px] text-slate-500 block">Team Member</span>
           </div>
         </div>
-        <button id="emp-logout" class="sidebar-btn hover:bg-red-500/10 hover:text-red-400">
+        <button id="emp-logout" class="sidebar-btn text-rose-600 hover:bg-rose-50 hover:text-rose-700">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
@@ -297,223 +293,276 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 min-h-screen">
       <!-- Navbar -->
-      <header class="bg-[var(--bg-surface)] border-b border-[var(--border-color)] h-16 flex items-center justify-between px-6 sticky top-0 z-20 shrink-0">
-        <h2 id="emp-header-title" class="text-lg font-bold text-[var(--text-primary)]">Employee Dashboard</h2>
+      <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20 shrink-0">
+        <div class="flex items-center gap-2">
+          <h2 id="emp-header-title" class="text-lg font-bold text-slate-900">Dashboard</h2>
+        </div>
         <div class="flex items-center gap-4">
-          <span id="emp-site" class="text-xs font-semibold px-3 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl text-indigo-400">Assigned: None</span>
-          <button id="emp-logout-mobile" class="md:hidden text-slate-400 hover:text-slate-200">
+          <!-- Mobile switcher -->
+          <div id="switcher-container-emp-mobile" class="hidden md:block"></div>
+          <button id="emp-logout-mobile" class="md:hidden text-slate-500 hover:text-slate-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3h4a3 3 0 013 3v1" />
             </svg>
           </button>
         </div>
       </header>
 
+      <!-- Tabs (Mobile Only) -->
+      <div class="border-b border-slate-200 bg-white md:hidden">
+        <nav class="flex overflow-x-auto px-4 py-2 gap-2 text-xs font-semibold scrollbar-none">
+          <button class="px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 shrink-0 employee-tab-btn" data-tab="dashboard">Dashboard</button>
+          <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 employee-tab-btn" data-tab="reports">My Timesheets</button>
+          <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 employee-tab-btn" data-tab="team-analytics">Team Analytics</button>
+          <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 employee-tab-btn" data-tab="settings">Settings</button>
+        </nav>
+      </div>
+
       <!-- Content -->
       <main class="flex-1 p-6 space-y-6 overflow-y-auto">
-        <!-- Active Shift Banner -->
-        <div id="active-shift-banner"
-          class="hidden bg-emerald-500/10 border border-emerald-500/25 rounded-xl p-4 flex items-center gap-3 text-emerald-400">
-          <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
-          <span class="font-medium text-sm">Active Shift Running</span>
-          <span class="text-xs text-emerald-400/80">Started at <span id="active-clock-in" class="font-semibold text-slate-100"></span></span>
-        </div>
+        <!-- ─── Dashboard Container ─── -->
+        <div id="emp-tab-dashboard" class="space-y-6">
+          
+          <!-- KPI Row -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+            <!-- Card 1 -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+              <div class="flex justify-between items-center text-slate-500">
+                <span class="text-xs font-semibold uppercase tracking-wider">Total Hours Month</span>
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span id="kpi-emp-month-hours" class="text-2xl font-bold text-slate-900">0.00 hrs</span>
+                <span class="text-xs text-slate-400">/ 160h</span>
+              </div>
+              <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div id="kpi-emp-month-progress" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+            <!-- Card 2 -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+              <div class="flex justify-between items-center text-slate-500">
+                <span class="text-xs font-semibold uppercase tracking-wider">This Week's Hours</span>
+                <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-full">+5%</span>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span id="kpi-emp-week-hours" class="text-2xl font-bold text-slate-900">0.00 hrs</span>
+                <span class="text-xs text-slate-400">/ 40h</span>
+              </div>
+              <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                <div id="kpi-emp-week-progress" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+            <!-- Card 3 -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+              <div class="flex justify-between items-center text-slate-500">
+                <span class="text-xs font-semibold uppercase tracking-wider">Days Worked Month</span>
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span id="kpi-emp-days" class="text-2xl font-bold text-slate-900">0 / 22 Days</span>
+              </div>
+              <div class="text-[10px] text-slate-400 font-semibold uppercase">Working Days</div>
+            </div>
+            <!-- Card 4 -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+              <div class="flex justify-between items-center text-slate-500">
+                <span class="text-xs font-semibold uppercase tracking-wider">Average Daily Hours</span>
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+              </div>
+              <div class="flex items-baseline gap-2">
+                <span id="kpi-emp-avg" class="text-2xl font-bold text-slate-900">0.00 hrs/day</span>
+              </div>
+              <div class="text-[10px] text-slate-400 font-semibold uppercase">Productive average</div>
+            </div>
+          </div>
 
-        <!-- 4 Column KPI Grid -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="stat-card flex flex-col justify-between h-28">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Hours Month</span>
-            <div class="flex items-baseline justify-between w-full">
-              <span id="kpi-emp-month-hours" class="text-2xl font-bold text-slate-100">0.00 h</span>
-              <span class="text-xs text-indigo-400">Monthly</span>
-            </div>
+          <!-- Active Session Banner -->
+          <div id="active-shift-banner"
+            class="hidden bg-emerald-50 border border-emerald-100 rounded-xl p-4 flex items-center gap-3 text-emerald-700 shadow-sm">
+            <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></span>
+            <span class="font-medium text-sm">Active Shift Running</span>
+            <span class="text-xs text-emerald-600/80">Started at <span id="active-clock-in" class="font-semibold text-slate-800"></span></span>
           </div>
-          <div class="stat-card flex flex-col justify-between h-28">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Hours Week</span>
-            <div class="flex items-baseline justify-between w-full">
-              <span id="kpi-emp-week-hours" class="text-2xl font-bold text-slate-100">0.00 h</span>
-              <span class="text-xs text-indigo-400">Weekly</span>
-            </div>
-          </div>
-          <div class="stat-card flex flex-col justify-between h-28">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Status</span>
-            <div class="flex items-center justify-between w-full">
-              <span id="kpi-emp-status" class="text-sm font-semibold text-slate-300 truncate pr-2">Not Clocked In</span>
-              <span id="kpi-emp-status-pill" class="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0"></span>
-            </div>
-          </div>
-          <div class="stat-card flex flex-col justify-between h-28">
-            <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Site Scheduled</span>
-            <div class="flex items-baseline justify-between w-full truncate">
-              <span id="kpi-emp-site" class="text-sm font-semibold text-slate-300 truncate">None Assigned</span>
-            </div>
-          </div>
-        </div>
 
-        <!-- 2 Column Charts Area -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 lg:col-span-2 shadow-2xl">
-            <h3 class="text-sm font-semibold text-slate-300 mb-4">Hours Logged This Week</h3>
-            <div class="chart-container">
-              <canvas id="weekly-chart"></canvas>
+          <!-- Split Layout -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Weekly Graph -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm lg:col-span-2 space-y-4">
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Weekly Hours Logged</h3>
+              <div class="chart-container">
+                <canvas id="weekly-chart"></canvas>
+              </div>
             </div>
-          </div>
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 shadow-2xl">
-            <h3 class="text-sm font-semibold text-slate-300 mb-4">Hours by Work Site</h3>
-            <div class="chart-container flex items-center justify-center">
-              <canvas id="emp-donut-chart"></canvas>
-            </div>
-          </div>
-        </div>
+            <!-- Right: Quick Action Tracker -->
+            <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col justify-between space-y-5">
+              <div class="space-y-4">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Session Tracker</h3>
+                <p class="text-xs text-slate-400">Select a project and track your work session in real-time.</p>
+                <div>
+                  <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Project / Category</label>
+                  <select id="clock-task-category" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select font-semibold">
+                    <option value="Product Development">Product Development</option>
+                    <option value="UI/UX Design">UI/UX Design</option>
+                    <option value="Customer Support">Customer Support</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Administrative">Administrative</option>
+                  </select>
+                </div>
+              </div>
+              
+              <!-- Timer block -->
+              <div class="text-center py-4 bg-slate-50 rounded-xl border border-slate-100 shadow-inner">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Time Elapsed</span>
+                <span id="running-timer" class="text-3xl font-mono font-bold text-slate-800 tracking-wider">00:00:00</span>
+              </div>
 
-        <!-- Lower Panel Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Recent Shifts Table -->
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 lg:col-span-2 shadow-2xl">
-            <h3 class="text-sm font-semibold text-slate-300 mb-4">Recent Shifts</h3>
+              <div>
+                <button id="btn-clock-action" class="w-full py-3 text-white font-semibold rounded-xl transition text-base shadow-md flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                  <span>Clock In</span>
+                </button>
+                <p id="kpi-emp-shift-type-container" class="mt-2 text-xs text-slate-400 text-center font-medium">Session status: <span id="kpi-emp-shift-type" class="font-bold text-slate-600">None</span></p>
+                <p id="clock-message" class="mt-2 text-xs text-center font-medium"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom: Recent Daily Logs -->
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Recent Daily Logs</h3>
             <div class="table-wrap">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="text-left text-[var(--text-muted)] border-b border-[var(--border-color)]">
-                    <th class="pb-2.5 font-medium">Date</th>
-                    <th class="pb-2.5 font-medium">Clock-In</th>
-                    <th class="pb-2.5 font-medium">Clock-Out</th>
-                    <th class="pb-2.5 font-medium">Hours</th>
-                    <th class="pb-2.5 font-medium">Site</th>
+                  <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
+                    <th id="th-emp-date" class="pb-3 px-2">Date<span id="sort-empShifts-date"> ▼</span></th>
+                    <th class="pb-3 px-2">Project/Task</th>
+                    <th class="pb-3 px-2">Check-in</th>
+                    <th class="pb-3 px-2">Check-out</th>
+                    <th class="pb-3 px-2">Break</th>
+                    <th id="th-emp-hours" class="pb-3 px-2">Net Hours<span id="sort-empShifts-hours"> ↕</span></th>
+                    <th class="pb-3 px-2">Status</th>
                   </tr>
                 </thead>
-                <tbody id="emp-shifts-body" class="divide-y divide-[var(--border-color)]">
+                <tbody id="emp-shifts-body" class="divide-y divide-slate-100 text-slate-700">
                 </tbody>
               </table>
-              <p id="emp-shifts-empty" class="text-center text-slate-500 py-6 hidden">No shifts recorded yet.</p>
-            </div>
-          </div>
-
-          <!-- Log Shift Form -->
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 shadow-2xl flex flex-col justify-between">
-            <div>
-              <h3 id="shift-log-title" class="text-sm font-semibold text-slate-300 mb-4">Log Shift</h3>
-              <form id="employee-shift-form" class="space-y-4">
-                <div>
-                  <label class="block text-xs font-medium text-[var(--text-muted)] mb-1">Site</label>
-                  <select id="shift-site"
-                    class="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
-                    <option value="">None</option>
-                  </select>
-                </div>
-                
-                <div class="grid grid-cols-1 gap-4">
-                  <div>
-                    <label class="block text-xs font-medium text-[var(--text-muted)] mb-1">Clock-In Date</label>
-                    <input type="date" id="shift-ci-date" required
-                      class="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-medium text-[var(--text-muted)] mb-1">Clock-In Time</label>
-                    <div class="flex gap-1">
-                      <select id="shift-ci-hour"
-                        class="w-full px-2 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
-                        <option value="12">12</option>
-                        <option value="01">01</option>
-                        <option value="02">02</option>
-                        <option value="03">03</option>
-                        <option value="04">04</option>
-                        <option value="05">05</option>
-                        <option value="06">06</option>
-                        <option value="07">07</option>
-                        <option value="08">08</option>
-                        <option value="09">09</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                      </select>
-                      <select id="shift-ci-minute"
-                        class="w-full px-2 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
-                        <option value="00">00</option>
-                        <option value="05">05</option>
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                        <option value="20">20</option>
-                        <option value="25">25</option>
-                        <option value="30">30</option>
-                        <option value="35">35</option>
-                        <option value="40">40</option>
-                        <option value="45">45</option>
-                        <option value="50">50</option>
-                        <option value="55">55</option>
-                      </select>
-                      <select id="shift-ci-period"
-                        class="w-full px-2 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
-                        <option value="AM">AM</option>
-                        <option value="PM">PM</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-1 gap-4 pt-1">
-                  <div>
-                    <label class="block text-xs font-medium text-[var(--text-muted)] mb-1">Clock-Out Date</label>
-                    <input type="date" id="shift-co-date"
-                      class="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                  </div>
-
-                  <div>
-                    <label class="block text-xs font-medium text-[var(--text-muted)] mb-1">Clock-Out Time</label>
-                    <div class="flex gap-1">
-                      <select id="shift-co-hour"
-                        class="w-full px-2 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
-                        <option value="12">12</option>
-                        <option value="01">01</option>
-                        <option value="02">02</option>
-                        <option value="03">03</option>
-                        <option value="04">04</option>
-                        <option value="05">05</option>
-                        <option value="06">06</option>
-                        <option value="07">07</option>
-                        <option value="08">08</option>
-                        <option value="09">09</option>
-                        <option value="10">10</option>
-                        <option value="11">11</option>
-                      </select>
-                      <select id="shift-co-minute"
-                        class="w-full px-2 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
-                        <option value="00">00</option>
-                        <option value="05">05</option>
-                        <option value="10">10</option>
-                        <option value="15">15</option>
-                        <option value="20">20</option>
-                        <option value="25">25</option>
-                        <option value="30">30</option>
-                        <option value="35">35</option>
-                        <option value="40">40</option>
-                        <option value="45">45</option>
-                        <option value="50">50</option>
-                        <option value="55">55</option>
-                      </select>
-                      <select id="shift-co-period"
-                        class="w-full px-2 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
-                        <option value="AM">AM</option>
-                        <option value="PM">PM</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="pt-2">
-                  <button type="submit" id="btn-save-shift" class="w-full py-2.5 btn-primary text-sm font-semibold flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                    </svg>
-                    <span id="btn-save-shift-text">Log Shift</span>
-                  </button>
-                </div>
-              </form>
-              <p id="shift-message" class="mt-3 text-xs text-slate-400 text-center"></p>
+              <p id="emp-shifts-empty" class="text-center text-slate-400 py-6 js-hidden">No shifts recorded yet.</p>
             </div>
           </div>
         </div>
+
+        <!-- ─── My Timesheets (Reports) ─── -->
+        <div id="emp-tab-reports" class="js-hidden space-y-6">
+          <div class="flex justify-between items-center flex-wrap gap-4">
+            <h2 class="text-lg font-bold text-slate-900 uppercase tracking-wider">My Shift Timesheets</h2>
+            <button id="btn-open-log-modal" class="btn-primary text-sm flex items-center gap-1.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+              Log Past Shift
+            </button>
+          </div>
+          <!-- Date Filter Card -->
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-wrap items-end gap-4">
+            <div class="flex flex-col">
+              <label class="block text-xs font-semibold text-slate-500 mb-1">From Date</label>
+              <input type="date" id="emp-report-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+            </div>
+            <div class="flex flex-col">
+              <label class="block text-xs font-semibold text-slate-500 mb-1">To Date</label>
+              <input type="date" id="emp-report-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+            </div>
+            <button id="btn-emp-filter-reports" class="btn-primary text-sm flex items-center gap-1">
+              Filter
+            </button>
+          </div>
+
+          <!-- KPI Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Hours</span>
+              <div class="flex items-center justify-between">
+                <span id="report-emp-total-hours" class="text-2xl font-bold text-indigo-600">0.00 h</span>
+                <span class="text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">Total Cumulative</span>
+              </div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Day Shift Hours</span>
+              <div class="flex items-center justify-between">
+                <span id="report-emp-day-hours" class="text-2xl font-bold text-amber-600">0.00 h</span>
+                <span class="text-xs font-semibold text-amber-800 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">Day Shift</span>
+              </div>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Night Shift Hours</span>
+              <div class="flex items-center justify-between">
+                <span id="report-emp-night-hours" class="text-2xl font-bold text-violet-600">0.00 h</span>
+                <span class="text-xs font-semibold text-indigo-800 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">Night Shift</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Detailed Table -->
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Detailed Shifts Report</h3>
+            <div class="table-wrap">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
+                    <th id="th-emp-rep-date" class="pb-3 px-2">Date<span id="sort-empReport-date"> ▼</span></th>
+                    <th id="th-emp-rep-type" class="pb-3 px-2">Shift Type<span id="sort-empReport-shift_type"> ↕</span></th>
+                    <th id="th-emp-rep-ci" class="pb-3 px-2">Clock-In (Started)<span id="sort-empReport-clock_in"> ↕</span></th>
+                    <th id="th-emp-rep-co" class="pb-3 px-2">Clock-Out (Finished)<span id="sort-empReport-clock_out"> ↕</span></th>
+                    <th id="th-emp-rep-hours" class="pb-3 px-2">Total Hours<span id="sort-empReport-hours"> ↕</span></th>
+                  </tr>
+                </thead>
+                <tbody id="emp-report-body" class="divide-y divide-slate-100 text-slate-700">
+                </tbody>
+              </table>
+              <p id="emp-report-empty" class="text-center text-slate-500 py-6 js-hidden">No shifts recorded in this period.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── Team Analytics Restricted View ─── -->
+        <div id="emp-tab-analytics" class="js-hidden space-y-6">
+          <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-sm max-w-xl mx-auto text-center space-y-4 my-12">
+            <div class="w-16 h-16 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center mx-auto text-indigo-600 shadow-sm">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-slate-900 tracking-tight">Access Restricted</h3>
+            <p class="text-slate-600 text-sm max-w-md mx-auto">
+              This panel contains company-wide timesheet summaries, headcount metrics, and pending approvals.
+            </p>
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-xs text-indigo-700 max-w-md mx-auto">
+              <p class="font-bold mb-1">💡 Demonstration Tip</p>
+              <p>Please use the **View Role** selector at the bottom of the sidebar to switch to **Admin View** to explore Team Analytics.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ─── Settings Tab ─── -->
+        <div id="emp-tab-settings" class="js-hidden space-y-6">
+          <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">My Settings</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Full Name</label>
+                <p id="settings-emp-name" class="font-medium text-slate-800 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100"></p>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Account Role</label>
+                <p id="settings-emp-role" class="font-medium text-slate-800 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">Team Member</p>
+              </div>
+            </div>
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-xs text-indigo-700 space-y-2">
+              <p class="font-bold">🔒 Secure Session Passcode</p>
+              <p>Your session is protected via passcode. Please do not share your entry credentials with others.</p>
+            </div>
+          </div>
+        </div>
+
       </main>
     </div>
   </div>
@@ -521,18 +570,18 @@
   <!-- ════════════════════════════════════════════════════════════
   ADMIN VIEW
   ════════════════════════════════════════════════════════════ -->
-  <div id="admin-view" class="hidden min-h-screen flex text-[var(--text-primary)] w-full">
+  <div id="admin-view" class="hidden min-h-screen flex text-slate-800 w-full">
     <!-- Left Sidebar -->
-    <aside class="w-64 bg-[var(--bg-surface)] border-r border-[var(--border-color)] flex flex-col justify-between p-5 sticky top-0 h-screen shrink-0 hidden md:flex">
-      <div>
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-5 sticky top-0 h-screen shrink-0 max-md:hidden flex">
+      <div class="space-y-6">
         <!-- Logo -->
-        <div class="flex items-center gap-3 mb-8 px-2">
-          <div class="w-10 h-10 bg-indigo-500/10 border border-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-3 px-2">
+          <div class="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <span class="font-bold text-lg text-[var(--text-primary)]">Admin Panel</span>
+          <span class="font-bold text-lg text-slate-900 tracking-tight">Admin Portal</span>
         </div>
         <!-- Navigation Menu -->
         <nav class="space-y-1">
@@ -540,41 +589,44 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H6a2 2 0 01-2-2v-4zM14 16a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2h-2a2 2 0 01-2-2v-4z" />
             </svg>
-            Overview
+            Dashboard
           </button>
-          <button class="sidebar-btn admin-tab-btn" data-tab="shifts">
+          <button class="sidebar-btn admin-tab-btn" data-tab="reports">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
             </svg>
-            Shifts
+            Team Analytics
           </button>
-          <button class="sidebar-btn admin-tab-btn" data-tab="employees">
+          <button class="sidebar-btn admin-tab-btn" data-tab="settings">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
-            Employees
-          </button>
-          <button class="sidebar-btn admin-tab-btn" data-tab="sites">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Sites &amp; Schedule
+            Settings
           </button>
         </nav>
       </div>
-      <!-- Footer Profile / Logout -->
-      <div>
-        <div class="flex items-center gap-3 mb-4 p-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-xl">
+      <!-- Footer Profile / Switching -->
+      <div class="space-y-4">
+        <!-- Switcher -->
+        <div id="switcher-container-adm" class="hidden pt-3 border-t border-slate-200">
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">View Role</label>
+          <select class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 form-select font-semibold" onchange="switchViewMode(this.value)" id="role-switcher-adm">
+            <option value="employee">Employee View</option>
+            <option value="admin" selected>Admin View</option>
+          </select>
+        </div>
+
+        <div class="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
           <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shrink-0">
             A
           </div>
           <div class="truncate font-medium">
-            <p class="text-sm truncate">Admin User</p>
-            <span class="text-[10px] text-[var(--text-muted)] block">Administrator</span>
+            <p class="text-sm text-slate-900 truncate">Admin User</p>
+            <span class="text-[10px] text-slate-500 block">Administrator</span>
           </div>
         </div>
-        <button id="admin-logout" class="sidebar-btn hover:bg-red-500/10 hover:text-red-400">
+        <button id="admin-logout" class="sidebar-btn text-rose-600 hover:bg-rose-50 hover:text-rose-700">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
@@ -586,244 +638,345 @@
     <!-- Main Content Area -->
     <div class="flex-1 flex flex-col min-w-0 min-h-screen">
       <!-- Navbar -->
-      <header class="bg-[var(--bg-surface)] border-b border-[var(--border-color)] h-16 flex items-center justify-between px-6 sticky top-0 z-20 shrink-0">
-        <h2 id="admin-header-title" class="text-lg font-bold text-[var(--text-primary)]">Admin Dashboard</h2>
+      <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-20 shrink-0">
+        <h2 id="admin-header-title" class="text-lg font-bold text-slate-900">Admin Dashboard</h2>
         <div class="flex items-center gap-4">
-          <button id="admin-logout-mobile" class="md:hidden text-slate-400 hover:text-slate-200">
+          <button id="admin-logout-mobile" class="md:hidden text-slate-500 hover:text-slate-700">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3h4a3 3 0 013 3v1" />
             </svg>
           </button>
         </div>
       </header>
 
       <!-- Tabs (Mobile Only) -->
-      <div class="border-b border-[var(--border-color)] bg-[var(--bg-surface)] md:hidden">
-        <nav class="flex overflow-x-auto px-4 py-2 gap-2 text-xs font-medium scrollbar-none">
-          <button class="px-3 py-1.5 rounded-lg bg-indigo-500/15 text-indigo-400 font-semibold shrink-0 admin-tab-btn" data-tab="overview">Overview</button>
-          <button class="px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-slate-200 shrink-0 admin-tab-btn" data-tab="shifts">Shifts</button>
-          <button class="px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-slate-200 shrink-0 admin-tab-btn" data-tab="employees">Employees</button>
-          <button class="px-3 py-1.5 rounded-lg text-[var(--text-muted)] hover:text-slate-200 shrink-0 admin-tab-btn" data-tab="sites">Sites &amp; Sched</button>
+      <div class="border-b border-slate-200 bg-white md:hidden">
+        <nav class="flex overflow-x-auto px-4 py-2 gap-2 text-xs font-semibold scrollbar-none">
+          <button class="px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 shrink-0 admin-tab-btn" data-tab="overview">Dashboard</button>
+          <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 admin-tab-btn" data-tab="reports">Team Analytics</button>
+          <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 admin-tab-btn" data-tab="settings">Settings</button>
         </nav>
       </div>
 
       <!-- Main Content -->
       <main class="flex-1 p-6 space-y-6 overflow-y-auto">
 
-        <!-- ─── Overview Panel ─── -->
+        <!-- ─── Dashboard Overview Panel ─── -->
         <div id="tab-overview" class="tab-content space-y-6">
+          
           <!-- KPI Stats Grid -->
-          <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="stat-card flex flex-col justify-between h-28">
-              <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Active Shifts</span>
-              <div class="flex items-baseline justify-between w-full">
-                <span id="stat-active" class="text-2xl font-bold text-slate-100">0</span>
-                <span class="text-xs text-emerald-400">On Duty</span>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Team Hours (Week)</span>
+              <div class="flex items-baseline justify-between">
+                <span id="stat-team-hours" class="text-2xl font-bold text-slate-900">0.00 h</span>
+                <span class="text-xs text-indigo-600 font-medium">Weekly Total</span>
               </div>
             </div>
-            <div class="stat-card flex flex-col justify-between h-28">
-              <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Employees</span>
-              <div class="flex items-baseline justify-between w-full">
-                <span id="stat-employees" class="text-2xl font-bold text-slate-100">0</span>
-                <span class="text-xs text-indigo-400">Total</span>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Active Employees</span>
+              <div class="flex items-baseline justify-between">
+                <span id="stat-active-employees" class="text-2xl font-bold text-slate-900">0 / 0</span>
+                <span class="text-xs text-emerald-600 font-medium">On Duty</span>
               </div>
             </div>
-            <div class="stat-card flex flex-col justify-between h-28">
-              <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Hours logged</span>
-              <div class="flex items-baseline justify-between w-full">
-                <span id="stat-hours" class="text-2xl font-bold text-slate-100">0.00 h</span>
-                <span class="text-xs text-indigo-400">This Week</span>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Pending Approvals</span>
+              <div class="flex items-baseline justify-between">
+                <span id="stat-pending" class="text-2xl font-bold text-amber-600">0</span>
+                <span class="text-xs text-amber-600 font-medium">Needs Review</span>
               </div>
             </div>
-            <div class="stat-card flex flex-col justify-between h-28">
-              <span class="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Work Sites</span>
-              <div class="flex items-baseline justify-between w-full">
-                <span id="stat-sites" class="text-2xl font-bold text-slate-100">0</span>
-                <span class="text-xs text-indigo-400">Active</span>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Overtime Alerts</span>
+              <div class="flex items-baseline justify-between">
+                <span id="stat-overtime" class="text-2xl font-bold text-rose-600">0</span>
+                <span class="text-xs text-rose-600 font-medium">Flagged</span>
               </div>
             </div>
           </div>
 
-          <!-- Charts -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 lg:col-span-2 shadow-2xl">
-              <h3 class="text-sm font-semibold text-slate-300 mb-4 font-medium">Weekly Hours per Employee</h3>
-              <div class="chart-container">
-                <canvas id="admin-weekly-chart"></canvas>
-              </div>
-            </div>
-            <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 shadow-2xl">
-              <h3 class="text-sm font-semibold text-slate-300 mb-4 font-medium">Hours by Site Distribution</h3>
-              <div class="chart-container flex items-center justify-center">
-                <canvas id="admin-donut-chart"></canvas>
-              </div>
+          <!-- Team Monthly History Chart -->
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Team Hours — Monthly Overview</h3>
+            <div class="chart-container">
+              <canvas id="admin-monthly-chart"></canvas>
             </div>
           </div>
-        </div>
 
-        <!-- ─── Shifts Panel ─── -->
-        <div id="tab-shifts" class="tab-content hidden space-y-4">
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-4 flex flex-wrap items-center gap-3">
-            <button id="btn-add-shift" class="btn-primary text-sm flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-              Add Shift
-            </button>
-            <select id="filter-employee"
-              class="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm bg-white form-select focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <option value="">All Employees</option>
-            </select>
-            <input type="date" id="filter-date-from" class="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            <span class="text-slate-500 text-sm">to</span>
-            <input type="date" id="filter-date-to" class="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-            <button id="btn-filter-shifts" class="btn-ghost text-sm border border-[var(--border-color)] flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
-              Filter
-            </button>
-          </div>
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 shadow-2xl">
+          <!-- Employee Directory -->
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Employee Directory</h3>
+              <div class="flex flex-wrap items-center gap-2">
+                <input type="text" id="dir-search" placeholder="Search employees..."
+                  class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 font-medium shadow-sm" />
+                <select id="dir-filter-dept" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select font-medium shadow-sm">
+                  <option value="">All Departments</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Product">Product</option>
+                  <option value="UI/UX Design">UI/UX Design</option>
+                  <option value="Customer Success">Customer Success</option>
+                  <option value="Marketing">Marketing</option>
+                </select>
+              </div>
+            </div>
             <div class="table-wrap">
               <table class="w-full text-sm">
                 <thead>
-                  <tr class="text-left text-[var(--text-muted)] border-b border-[var(--border-color)]">
-                    <th class="pb-2.5 font-medium">Employee</th>
-                    <th class="pb-2.5 font-medium">Date</th>
-                    <th class="pb-2.5 font-medium">In</th>
-                    <th class="pb-2.5 font-medium">Out</th>
-                    <th class="pb-2.5 font-medium">Hours</th>
-                    <th class="pb-2.5 font-medium">Site</th>
-                    <th class="pb-2.5 font-medium">Actions</th>
+                  <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
+                    <th id="th-adm-dir-name" class="pb-3 px-2">Employee<span id="sort-adminDirectory-name"> ↕</span></th>
+                    <th id="th-adm-dir-dept" class="pb-3 px-2">Department<span id="sort-adminDirectory-dept"> ↕</span></th>
+                    <th id="th-adm-dir-week" class="pb-3 px-2">Hours This Week<span id="sort-adminDirectory-weekly_hours"> ↕</span></th>
+                    <th id="th-adm-dir-month" class="pb-3 px-2">Hours This Month<span id="sort-adminDirectory-monthly_hours"> ↕</span></th>
+                    <th id="th-adm-dir-days" class="pb-3 px-2">Days Worked<span id="sort-adminDirectory-days_worked"> ↕</span></th>
+                    <th class="pb-3 px-2">Status</th>
+                    <th class="pb-3 px-2">Actions</th>
                   </tr>
                 </thead>
-                <tbody id="admin-shifts-body" class="divide-y divide-[var(--border-color)]">
+                <tbody id="admin-directory-body" class="divide-y divide-slate-100 text-slate-700">
                 </tbody>
               </table>
-              <p id="admin-shifts-empty" class="text-center text-slate-500 py-6 hidden">No shifts found.</p>
+              <p id="admin-directory-empty" class="text-center text-slate-400 py-6 hidden">No employees found.</p>
             </div>
           </div>
         </div>
 
-        <!-- ─── Employees Panel ─── -->
-        <div id="tab-employees" class="tab-content hidden space-y-4">
-          <div class="flex justify-between items-center">
-            <button id="btn-add-employee" class="btn-primary text-sm flex items-center gap-2">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-              Add Employee
+        <!-- ─── Team Analytics Tab (Reports + Shifts + Employees Sub-views) ─── -->
+        <div id="tab-reports" class="tab-content hidden space-y-6">
+          
+          <!-- Sub-tabs navigation bar -->
+          <div class="border-b border-slate-200 bg-white rounded-xl p-2 shadow-sm flex flex-wrap gap-2">
+            <button class="px-4 py-2 text-xs font-bold rounded-lg bg-indigo-100 text-indigo-700 sub-tab-btn" data-subtab="admin-reports-view">
+              Detailed Reports
+            </button>
+            <button class="px-4 py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 sub-tab-btn" data-subtab="admin-shifts-view">
+              Shift Records
+            </button>
+            <button class="px-4 py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 sub-tab-btn" data-subtab="admin-employees-view">
+              Manage Employees
             </button>
           </div>
-          <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 shadow-2xl">
-            <div class="table-wrap">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="text-left text-[var(--text-muted)] border-b border-[var(--border-color)]">
-                    <th class="pb-2.5 font-medium">Name</th>
-                    <th class="pb-2.5 font-medium">Type</th>
-                    <th class="pb-2.5 font-medium">Status</th>
-                    <th class="pb-2.5 font-medium">Actions</th>
-                  </tr>
-                </thead>
-                <tbody id="admin-employees-body" class="divide-y divide-[var(--border-color)]">
-                </tbody>
-              </table>
+
+          <!-- SUBTAB 1: Detailed Reports View -->
+          <div id="sub-admin-reports-view" class="subtab-content space-y-6">
+            <!-- Filters Panel -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-wrap items-end gap-4">
+              <div class="flex flex-col">
+                <label class="block text-xs font-semibold text-slate-500 mb-1">Employee</label>
+                <select id="admin-report-employee"
+                  class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 font-semibold">
+                  <option value="">All Employees</option>
+                </select>
+              </div>
+              <div class="flex flex-col">
+                <label class="block text-xs font-semibold text-slate-500 mb-1">From Date</label>
+                <input type="date" id="admin-report-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+              </div>
+              <div class="flex flex-col">
+                <label class="block text-xs font-semibold text-slate-500 mb-1">To Date</label>
+                <input type="date" id="admin-report-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+              </div>
+              <div class="flex gap-2">
+                <button id="btn-admin-filter-reports" class="btn-primary text-sm flex items-center gap-1">
+                  Filter
+                </button>
+                <button id="btn-admin-print-reports" class="btn-ghost text-sm border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Print
+                </button>
+              </div>
+            </div>
+
+            <!-- KPI Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Hours Logged</span>
+                <div class="flex items-baseline justify-between">
+                  <span id="report-admin-total-hours" class="text-2xl font-bold text-indigo-600">0.00 h</span>
+                  <span class="text-xs text-slate-400">Team Total</span>
+                </div>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Day Shift Hours</span>
+                <div class="flex items-baseline justify-between">
+                  <span id="report-admin-day-hours" class="text-2xl font-bold text-amber-600">0.00 h</span>
+                  <span class="text-xs text-amber-500">Day Total</span>
+                </div>
+              </div>
+              <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
+                <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Night Shift Hours</span>
+                <div class="flex items-baseline justify-between">
+                  <span id="report-admin-night-hours" class="text-2xl font-bold text-violet-600">0.00 h</span>
+                  <span class="text-xs text-violet-500">Night Total</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Detailed Shifts Table -->
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm print-area" id="admin-print-area">
+              <div class="hidden print:block mb-6 text-center border-b border-slate-200 pb-4">
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Timesheet Summary Report</h1>
+                <p class="text-slate-500 text-sm mt-1">Generated on <span id="print-date"></span></p>
+              </div>
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 print:hidden">Shifts Summary List</h3>
+              <div class="table-wrap">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider print:text-slate-800">
+                      <th id="th-adm-rep-name" class="pb-3 px-2">Employee<span id="sort-adminReport-employee_name"> ↕</span></th>
+                      <th id="th-adm-rep-date" class="pb-3 px-2">Date<span id="sort-adminReport-date"> ↕</span></th>
+                      <th id="th-adm-rep-type" class="pb-3 px-2">Shift Type<span id="sort-adminReport-shift_type"> ↕</span></th>
+                      <th class="pb-3 px-2">Started (Clock-In)</th>
+                      <th class="pb-3 px-2">Finished (Clock-Out)</th>
+                      <th id="th-adm-rep-hours" class="pb-3 px-2">Hours<span id="sort-adminReport-hours"> ↕</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-report-body" class="divide-y divide-slate-100 text-slate-700 print:text-slate-800">
+                  </tbody>
+                </table>
+                <p id="admin-report-empty" class="text-center text-slate-400 py-6 hidden">No shifts recorded in this period.</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- ─── Sites & Schedule Panel ─── -->
-        <div id="tab-sites" class="tab-content hidden space-y-6">
-          <!-- Sites Section -->
-          <div>
-            <div class="flex items-center justify-between mb-3">
-              <h3 class="text-sm font-semibold text-slate-300">Work Sites</h3>
-              <button id="btn-add-site" class="btn-primary text-xs flex items-center gap-1.5">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                Add Site
+          <!-- SUBTAB 2: Shifts List View -->
+          <div id="sub-admin-shifts-view" class="subtab-content hidden space-y-6">
+            <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm flex flex-wrap items-center gap-3">
+              <button id="btn-add-shift" class="btn-primary text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Add Shift
+              </button>
+              <select id="filter-employee"
+                class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold shadow-sm w-44">
+                <option value="">All Employees</option>
+              </select>
+              <input type="date" id="filter-date-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+              <span class="text-slate-400 text-sm font-semibold">to</span>
+              <input type="date" id="filter-date-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
+              <button id="btn-filter-shifts" class="btn-ghost text-sm border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5">
+                Filter
               </button>
             </div>
-            <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 shadow-2xl">
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
               <div class="table-wrap">
                 <table class="w-full text-sm">
                   <thead>
-                    <tr class="text-left text-[var(--text-muted)] border-b border-[var(--border-color)]">
-                      <th class="pb-2.5 font-medium">Name</th>
-                      <th class="pb-2.5 font-medium">Actions</th>
+                    <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
+                      <th id="th-adm-sh-name" class="pb-3 px-2">Employee<span id="sort-adminShifts-employee_name"> ↕</span></th>
+                      <th id="th-adm-sh-date" class="pb-3 px-2">Date<span id="sort-adminShifts-date"> ↕</span></th>
+                      <th id="th-adm-sh-type" class="pb-3 px-2">Shift Type<span id="sort-adminShifts-shift_type"> ↕</span></th>
+                      <th class="pb-3 px-2">In</th>
+                      <th class="pb-3 px-2">Out</th>
+                      <th id="th-adm-sh-hours" class="pb-3 px-2">Hours<span id="sort-adminShifts-hours"> ↕</span></th>
+                      <th class="pb-3 px-2">Actions</th>
                     </tr>
                   </thead>
-                  <tbody id="admin-sites-body" class="divide-y divide-[var(--border-color)]">
+                  <tbody id="admin-shifts-body" class="divide-y divide-slate-100 text-slate-700">
+                  </tbody>
+                </table>
+                <p id="admin-shifts-empty" class="text-center text-slate-400 py-6 hidden">No shifts found.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUBTAB 3: Manage Employees View -->
+          <div id="sub-admin-employees-view" class="subtab-content hidden space-y-6">
+            <div class="flex justify-between items-center">
+              <button id="btn-add-employee" class="btn-primary text-sm flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                Add Employee
+              </button>
+            </div>
+            <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+              <div class="table-wrap">
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="text-left text-slate-400 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
+                      <th class="pb-3 px-2">Name</th>
+                      <th class="pb-3 px-2">Type</th>
+                      <th class="pb-3 px-2">Status</th>
+                      <th class="pb-3 px-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="admin-employees-body" class="divide-y divide-slate-100 text-slate-700">
                   </tbody>
                 </table>
               </div>
             </div>
           </div>
-          <!-- Schedule Section -->
-          <div>
-            <h3 class="text-sm font-semibold text-slate-300 mb-3">Schedule Assignments</h3>
-            <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl p-5 space-y-4 shadow-2xl">
-              <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                <select id="sched-employee"
-                  class="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm bg-white form-select focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="">Select Employee</option>
-                </select>
-                <select id="sched-site"
-                  class="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm bg-white form-select focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="">Select Site</option>
-                </select>
-                <input type="date" id="sched-date" class="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-                <button id="btn-add-schedule" class="btn-primary text-sm">Assign</button>
+
+        </div>
+
+        <!-- ─── Admin Settings Tab ─── -->
+        <div id="tab-settings" class="tab-content hidden space-y-6">
+          <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-xl space-y-4">
+            <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Admin Panel Settings</h3>
+            <div class="space-y-4">
+              <div class="flex justify-between items-center py-2 border-b border-slate-50">
+                <div>
+                  <p class="text-sm font-semibold text-slate-800">Auto-Approve Employee Logs</p>
+                  <p class="text-xs text-slate-400">Allows shifts entered manually by employees to be approved automatically</p>
+                </div>
+                <div class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" checked class="sr-only peer">
+                  <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                </div>
               </div>
-              <div class="table-wrap">
-                <table class="w-full text-sm">
-                  <thead>
-                    <tr class="text-left text-[var(--text-muted)] border-b border-[var(--border-color)]">
-                      <th class="pb-2.5 font-medium">Employee</th>
-                      <th class="pb-2.5 font-medium">Site</th>
-                      <th class="pb-2.5 font-medium">Date</th>
-                      <th class="pb-2.5 font-medium">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="admin-schedules-body" class="divide-y divide-[var(--border-color)]">
-                  </tbody>
-                </table>
-                <p id="admin-schedules-empty" class="text-center text-slate-500 py-4 hidden">No schedules assigned.</p>
+              <div class="flex justify-between items-center py-2 border-b border-slate-50">
+                <div>
+                  <p class="text-sm font-semibold text-slate-800">Enforce 30-Minute Rounding</p>
+                  <p class="text-xs text-slate-400">Rounds clock sessions automatically to the nearest 0.5 hours</p>
+                </div>
+                <div class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" checked disabled class="sr-only peer">
+                  <div class="w-9 h-5 bg-indigo-600 rounded-full after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 opacity-70"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
       </main>
     </div>
   </div>
 
   <!-- ════════════════════════════════════════════════════════════
-MODALS
-════════════════════════════════════════════════════════════ -->
+  MODALS
+  ════════════════════════════════════════════════════════════ -->
 
   <!-- Generic Alert / Confirm Modal -->
-  <!-- Generic Alert / Confirm Modal -->
   <div id="modal-alert" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-2xl p-6 max-w-sm w-full">
-      <p id="modal-alert-msg" class="text-slate-300 text-center text-sm"></p>
-      <div class="flex justify-center gap-3 mt-5">
-        <button id="modal-alert-ok" class="btn-primary text-sm">OK</button>
+    <div class="bg-white border border-slate-200 rounded-xl shadow-2xl p-6 max-w-sm w-full space-y-4 text-center">
+      <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+      </div>
+      <p id="modal-alert-msg" class="text-slate-700 text-sm font-semibold"></p>
+      <div class="flex justify-center gap-3">
+        <button id="modal-alert-ok" class="btn-primary text-xs w-full py-2">OK</button>
       </div>
     </div>
   </div>
 
-  <!-- Employee Modal -->
+  <!-- Employee Add/Edit Modal -->
   <div id="modal-employee" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-2xl p-6 max-w-sm w-full">
-      <h3 id="modal-employee-title" class="text-base font-bold text-slate-100 mb-4"></h3>
+    <div class="bg-white border border-slate-200 rounded-xl shadow-2xl p-6 max-w-sm w-full space-y-4">
+      <h3 id="modal-employee-title" class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2"></h3>
       <form id="form-employee" class="space-y-4">
         <input type="hidden" id="form-employee-id" />
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Name</label>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Name</label>
           <input type="text" id="form-employee-name" required
-            class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
         </div>
         <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">
-            Password <span class="text-slate-500 font-normal" id="emp-pass-hint"></span>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">
+            Password <span class="text-slate-400 font-normal" id="emp-pass-hint"></span>
           </label>
           <input type="text" id="form-employee-password"
-            class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
             placeholder="Leave blank to keep current" />
         </div>
         <div class="flex gap-3 justify-end pt-2">
@@ -834,56 +987,30 @@ MODALS
     </div>
   </div>
 
-  <!-- Site Modal -->
-  <div id="modal-site" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-2xl p-6 max-w-sm w-full">
-      <h3 id="modal-site-title" class="text-base font-bold text-slate-100 mb-4"></h3>
-      <form id="form-site" class="space-y-4">
-        <input type="hidden" id="form-site-id" />
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Site Name</label>
-          <input type="text" id="form-site-name" required
-            class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        </div>
-        <div class="flex gap-3 justify-end pt-2">
-          <button type="button" class="btn-ghost text-xs" onclick="closeModal('modal-site')">Cancel</button>
-          <button type="submit" class="btn-primary text-xs">Save</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- Shift Modal -->
+  <!-- Shift Modal (Log / Edit shifts) -->
   <div id="modal-shift" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
-    <div class="bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl shadow-2xl p-6 max-w-md w-full">
-      <h3 id="modal-shift-title" class="text-base font-bold text-slate-100 mb-4"></h3>
+    <div class="bg-white border border-slate-200 rounded-xl shadow-2xl p-6 max-w-md w-full space-y-4">
+      <h3 id="modal-shift-title" class="text-base font-bold text-slate-900 border-b border-slate-100 pb-2"></h3>
       <form id="form-shift" class="space-y-4">
         <input type="hidden" id="form-shift-id" />
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Employee</label>
+        <div id="admin-only-shift-field">
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Employee</label>
           <select id="form-shift-employee"
-            class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select" required>
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select font-semibold">
             <option value="">Select</option>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs font-semibold text-slate-400 mb-1">Site</label>
-          <select id="form-shift-site"
-            class="w-full px-3 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
-            <option value="">None</option>
           </select>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Clock-In Date</label>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Clock-In Date</label>
             <input type="date" id="form-shift-ci-date" required
-              class="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Clock-In Time</label>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Clock-In Time</label>
             <div class="flex gap-1">
               <select id="form-shift-ci-hour"
-                class="w-14 px-1 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
+                class="w-14 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
                 <option value="12">12</option>
                 <option value="01">01</option>
                 <option value="02">02</option>
@@ -897,9 +1024,9 @@ MODALS
                 <option value="10">10</option>
                 <option value="11">11</option>
               </select>
-              <span class="self-center text-slate-500 text-xs">:</span>
+              <span class="self-center text-slate-400 text-xs">:</span>
               <select id="form-shift-ci-minute"
-                class="w-14 px-1 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
+                class="w-14 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
                 <option value="00">00</option>
                 <option value="05">05</option>
                 <option value="10">10</option>
@@ -914,7 +1041,7 @@ MODALS
                 <option value="55">55</option>
               </select>
               <select id="form-shift-ci-period"
-                class="w-16 px-1 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
+                class="w-16 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
                 <option value="AM">AM</option>
                 <option value="PM">PM</option>
               </select>
@@ -923,15 +1050,15 @@ MODALS
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Clock-Out Date</label>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Clock-Out Date</label>
             <input type="date" id="form-shift-co-date"
-              class="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-400 mb-1">Clock-Out Time</label>
+            <label class="block text-xs font-semibold text-slate-500 mb-1">Clock-Out Time</label>
             <div class="flex gap-1">
               <select id="form-shift-co-hour"
-                class="w-14 px-1 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
+                class="w-14 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
                 <option value="12">12</option>
                 <option value="01">01</option>
                 <option value="02">02</option>
@@ -945,42 +1072,308 @@ MODALS
                 <option value="10">10</option>
                 <option value="11">11</option>
               </select>
-              <span class="self-center text-slate-500 text-xs">:</span>
+              <span class="self-center text-slate-400 text-xs">:</span>
               <select id="form-shift-co-minute"
-                class="w-14 px-1 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-slate-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select">
+                class="w-14 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
                 <option value="00">00</option>
                 <option value="05">05</option>
                 <option value="10">10</option>
                 <option value="15">15</option>
-<script>
+                <option value="20">20</option>
+                <option value="25">25</option>
+                <option value="30">30</option>
+                <option value="35">35</option>
+                <option value="40">40</option>
+                <option value="45">45</option>
+                <option value="50">50</option>
+                <option value="55">55</option>
+              </select>
+              <select id="form-shift-co-period"
+                class="w-16 px-1 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-500 mb-1">Shift Type (Checkpoint)</label>
+          <select id="form-shift-type" required
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+            <option value="Day">Day Shift</option>
+            <option value="Night">Night Shift</option>
+          </select>
+        </div>
+        <div class="flex gap-3 justify-end pt-2">
+          <button type="button" class="btn-ghost text-xs" onclick="closeModal('modal-shift')">Cancel</button>
+          <button type="submit" class="btn-primary text-xs">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
     /* ─── State ─── */
     let state = {
       token: localStorage.getItem('token'),
       employeeId: null,
       isAdmin: false,
+      isDemoAdmin: false,
       employeeName: '',
       weeklyChart: null,
-      empDonutChart: null,
-      adminWeeklyChart: null,
-      adminDonutChart: null,
+      adminMonthlyChart: null,
     };
 
     let userChangedTime = false;
+    let adminPollInterval = null;
 
-    // Customize Chart.js defaults to fit the dark theme
+    /* ─── Sorting State & Helpers ─── */
+    let sortStates = {
+      empShifts: { col: 'date', order: 'desc' },
+      empReport: { col: 'date', order: 'desc' },
+      adminDirectory: { col: 'name', order: 'asc' },
+      adminShifts: { col: 'date', order: 'desc' },
+      adminReport: { col: 'employee_name', order: 'asc' }
+    };
+
+    function sortData(arr, col, order) {
+      arr.sort((a, b) => {
+        let valA = a[col];
+        let valB = b[col];
+        if (valA == null) return order === 'asc' ? 1 : -1;
+        if (valB == null) return order === 'asc' ? -1 : 1;
+        
+        if (typeof valA === 'string') {
+          return order === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else {
+          return order === 'asc' ? valA - valB : valB - valA;
+        }
+      });
+    }
+
+    function toggleSort(tableId, col) {
+      const sort = sortStates[tableId];
+      if (sort.col === col) {
+        sort.order = sort.order === 'asc' ? 'desc' : 'asc';
+      } else {
+        sort.col = col;
+        sort.order = 'asc';
+      }
+      updateSortIndicators(tableId);
+      if (tableId === 'empShifts') {
+        renderEmployeeShiftsTable();
+      } else if (tableId === 'empReport') {
+        renderEmployeeReportsTable();
+      } else if (tableId === 'adminDirectory') {
+        renderAdminDirectory();
+      } else if (tableId === 'adminShifts') {
+        renderAdminShiftsTable();
+      } else if (tableId === 'adminReport') {
+        renderAdminReportsTable();
+      }
+    }
+
+    function updateSortIndicators(tableId) {
+      const sort = sortStates[tableId];
+      document.querySelectorAll(`[id^="sort-${tableId}-"]`).forEach(span => {
+        const colName = span.id.replace(`sort-${tableId}-`, '');
+        if (colName === sort.col) {
+          span.textContent = sort.order === 'asc' ? ' ▲' : ' ▼';
+        } else {
+          span.textContent = ' ↕';
+        }
+      });
+    }
+
+    /* ─── Mock Database for Demo Mode ─── */
+    const MOCK_ADMIN_DASHBOARD = {
+      weekly_hours: {
+        "John Doe": 38.5,
+        "Jane Smith": 40.0,
+        "Bob Wilson": 42.5
+      },
+      monthly_hours: {
+        "John Doe": 150.0,
+        "Jane Smith": 160.0,
+        "Bob Wilson": 155.0
+      },
+      active_shifts: 2,
+      total_employees: 3
+    };
+
+    let mockAdminShifts = [
+      { id: 1001, employee_id: 101, employee_name: "John Doe", date: "2026-06-15", clock_in: "08:00 AM", clock_out: "04:30 PM", hours: 8.5, shift_type: "Day" },
+      { id: 1002, employee_id: 102, employee_name: "Jane Smith", date: "2026-06-15", clock_in: "09:00 AM", clock_out: "05:00 PM", hours: 8.0, shift_type: "Day" },
+      { id: 1003, employee_id: 103, employee_name: "Bob Wilson", date: "2026-06-14", clock_in: "10:00 PM", clock_out: "06:00 AM", hours: 8.0, shift_type: "Night" },
+      { id: 1004, employee_id: 101, employee_name: "John Doe", date: "2026-06-12", clock_in: "08:30 AM", clock_out: "05:00 PM", hours: 8.5, shift_type: "Day" },
+      { id: 1005, employee_id: 102, employee_name: "Jane Smith", date: "2026-06-11", clock_in: "09:00 AM", clock_out: "05:30 PM", hours: 8.5, shift_type: "Day" }
+    ];
+
+    let mockAdminEmployees = [
+      { id: 101, name: "John Doe", is_admin: false, active: true, has_password: true },
+      { id: 102, name: "Jane Smith", is_admin: false, active: true, has_password: true },
+      { id: 103, name: "Bob Wilson", is_admin: false, active: true, has_password: true }
+    ];
+
+    let mockAdminDirectory = [
+      { id: 101, name: "John Doe", weekly_hours: 38.5, monthly_hours: 150.0, days_worked: 18, active_now: true },
+      { id: 102, name: "Jane Smith", weekly_hours: 40.0, monthly_hours: 160.0, days_worked: 20, active_now: true },
+      { id: 103, name: "Bob Wilson", weekly_hours: 42.5, monthly_hours: 155.0, days_worked: 19, active_now: false }
+    ];
+
+    const MOCK_ADMIN_MONTHLY_HISTORY = [
+      { month: "Jan", hours: 450.0 },
+      { month: "Feb", hours: 480.0 },
+      { month: "Mar", hours: 510.0 },
+      { month: "Apr", hours: 490.0 },
+      { month: "May", hours: 520.0 },
+      { month: "Jun", hours: 540.0 }
+    ];
+
+    function handleDemoAdminApi(path, options) {
+      const url = new URL(path, window.location.origin);
+      const pathname = url.pathname;
+      
+      if (pathname === '/api/admin/dashboard') {
+        return Promise.resolve(MOCK_ADMIN_DASHBOARD);
+      }
+      if (pathname === '/api/admin/directory') {
+        return Promise.resolve(mockAdminDirectory);
+      }
+      if (pathname === '/api/admin/hours/monthly-history') {
+        return Promise.resolve(MOCK_ADMIN_MONTHLY_HISTORY);
+      }
+      if (pathname === '/api/admin/shifts') {
+        const empId = url.searchParams.get('employee_id');
+        let data = [...mockAdminShifts];
+        if (empId) {
+          data = data.filter(s => s.employee_id === parseInt(empId));
+        }
+        return Promise.resolve(data);
+      }
+      if (pathname === '/api/admin/employees') {
+        return Promise.resolve(mockAdminEmployees);
+      }
+      if (pathname === '/api/admin/reports') {
+        const empId = url.searchParams.get('employee_id');
+        let shifts = [...mockAdminShifts];
+        if (empId) {
+          shifts = shifts.filter(s => s.employee_id === parseInt(empId));
+        }
+        const total = shifts.reduce((sum, s) => sum + (s.hours || 0), 0);
+        const day = shifts.filter(s => s.shift_type === 'Day').reduce((sum, s) => sum + (s.hours || 0), 0);
+        const night = shifts.filter(s => s.shift_type === 'Night').reduce((sum, s) => sum + (s.hours || 0), 0);
+        return Promise.resolve({
+          shifts: shifts,
+          summary: {
+            total_hours: total,
+            day_hours: day,
+            night_hours: night,
+            total_shifts: shifts.length
+          }
+        });
+      }
+      
+      if (options.method === 'POST') {
+        const body = JSON.parse(options.body || '{}');
+        if (pathname === '/api/admin/shifts') {
+          const emp = mockAdminEmployees.find(e => e.id === body.employee_id);
+          const newShift = {
+            id: Date.now(),
+            employee_id: body.employee_id,
+            employee_name: emp ? emp.name : "Unknown",
+            date: body.clock_in_date,
+            clock_in: body.clock_in_time,
+            clock_out: body.clock_out_time,
+            hours: 8.0, 
+            shift_type: body.shift_type || "Day"
+          };
+          mockAdminShifts.unshift(newShift);
+          return Promise.resolve({ message: "Shift created successfully (Demo Mode)" });
+        }
+        if (pathname === '/api/admin/employees') {
+          const newEmp = {
+            id: Date.now(),
+            name: body.name,
+            is_admin: false,
+            active: true,
+            has_password: true
+          };
+          mockAdminEmployees.push(newEmp);
+          mockAdminDirectory.push({
+            id: newEmp.id,
+            name: newEmp.name,
+            weekly_hours: 0,
+            monthly_hours: 0,
+            days_worked: 0,
+            active_now: false
+          });
+          return Promise.resolve({ message: "Employee created successfully (Demo Mode)" });
+        }
+      }
+      
+      if (options.method === 'PUT') {
+        const body = JSON.parse(options.body || '{}');
+        const parts = pathname.split('/');
+        const id = parseInt(parts[parts.length - 1]);
+        if (pathname.startsWith('/api/admin/shifts/')) {
+          const idx = mockAdminShifts.findIndex(s => s.id === id);
+          if (idx !== -1) {
+            mockAdminShifts[idx].date = body.clock_in_date;
+            mockAdminShifts[idx].clock_in = body.clock_in_time;
+            mockAdminShifts[idx].clock_out = body.clock_out_time;
+            mockAdminShifts[idx].shift_type = body.shift_type || mockAdminShifts[idx].shift_type;
+          }
+          return Promise.resolve({ message: "Shift updated successfully (Demo Mode)" });
+        }
+        if (pathname.startsWith('/api/admin/employees/')) {
+          const idx = mockAdminEmployees.findIndex(e => e.id === id);
+          if (idx !== -1) {
+            mockAdminEmployees[idx].name = body.name;
+          }
+          const dirIdx = mockAdminDirectory.findIndex(e => e.id === id);
+          if (dirIdx !== -1) {
+            mockAdminDirectory[dirIdx].name = body.name;
+          }
+          return Promise.resolve({ message: "Employee updated successfully (Demo Mode)" });
+        }
+      }
+      
+      if (options.method === 'DELETE') {
+        const parts = pathname.split('/');
+        const id = parseInt(parts[parts.length - 1]);
+        if (pathname.startsWith('/api/admin/shifts/')) {
+          mockAdminShifts = mockAdminShifts.filter(s => s.id !== id);
+          return Promise.resolve({ message: "Shift deleted successfully (Demo Mode)" });
+        }
+        if (pathname.startsWith('/api/admin/employees/')) {
+          mockAdminEmployees = mockAdminEmployees.filter(e => e.id !== id);
+          mockAdminDirectory = mockAdminDirectory.filter(e => e.id !== id);
+          return Promise.resolve({ message: "Employee deleted successfully (Demo Mode)" });
+        }
+      }
+      
+      return Promise.resolve({ message: "Action simulated successfully in Demo Mode!" });
+    }
+
+    // Customize Chart.js defaults to fit the light theme
     if (window.Chart) {
-      Chart.defaults.color = '#94a3b8';
-      Chart.defaults.font.family = "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
-      Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
-      Chart.defaults.plugins.tooltip.backgroundColor = '#151b26';
-      Chart.defaults.plugins.tooltip.titleColor = '#f8fafc';
-      Chart.defaults.plugins.tooltip.bodyColor = '#f8fafc';
-      Chart.defaults.plugins.tooltip.borderColor = '#1f293d';
+      Chart.defaults.color = '#64748b';
+      Chart.defaults.font.family = "'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif";
+      Chart.defaults.scale.grid.color = 'rgba(15, 23, 42, 0.05)';
+      Chart.defaults.plugins.tooltip.backgroundColor = '#ffffff';
+      Chart.defaults.plugins.tooltip.titleColor = '#0f172a';
+      Chart.defaults.plugins.tooltip.bodyColor = '#334155';
+      Chart.defaults.plugins.tooltip.borderColor = '#e2e8f0';
       Chart.defaults.plugins.tooltip.borderWidth = 1;
     }
 
     /* ─── API ─── */
     async function api(path, options = {}) {
+      if (state.isDemoAdmin && path.includes('/api/admin/')) {
+        return handleDemoAdminApi(path, options);
+      }
+      
       const headers = { 'Content-Type': 'application/json', ...options.headers };
       if (state.token) {
         headers['Authorization'] = `Bearer ${state.token}`;
@@ -993,20 +1386,27 @@ MODALS
       return res.json();
     }
 
-    /* ─── Time Helpers ─── */
-    function getTimeValue() {
-      const h = document.getElementById('time-hour').value;
-      const m = document.getElementById('time-minute').value;
-      const p = document.getElementById('time-period').value;
-      return `${h}:${m} ${p}`;
-    }
-
+    /* ─── Time & Date Helpers ─── */
     function getDateTimeFromSelects(hourId, minId, perId, dateId) {
       const h = document.getElementById(hourId).value;
       const m = document.getElementById(minId).value;
       const p = document.getElementById(perId).value;
       const d = document.getElementById(dateId).value;
       return { date: d, time: `${h}:${m} ${p}` };
+    }
+
+    function getCurrentTime12h() {
+      const now = new Date();
+      let h = now.getHours();
+      const m = now.getMinutes();
+      const p = h >= 12 ? 'PM' : 'AM';
+      if (h > 12) h -= 12;
+      if (h === 0) h = 12;
+      return `${h.toString().padStart(2, '0')}:${Math.floor(m / 5) * 5 === 60 ? '55' : (Math.floor(m / 5) * 5).toString().padStart(2, '0')} ${p}`;
+    }
+
+    function getCurrentDateISO() {
+      return new Date().toISOString().split('T')[0];
     }
 
     function setDefaultTime() {
@@ -1020,31 +1420,43 @@ MODALS
       const mm = Math.floor(m / 5) * 5;
       const mmStr = mm < 10 ? '0' + mm : '' + mm;
 
-      // New employee view elements
-      const newCiHour = document.getElementById('shift-ci-hour');
+      const newCiHour = document.getElementById('form-shift-ci-hour');
       if (newCiHour && !newCiHour.disabled) {
         newCiHour.value = hh;
-        document.getElementById('shift-ci-minute').value = mmStr;
-        document.getElementById('shift-ci-period').value = p;
+        document.getElementById('form-shift-ci-minute').value = mmStr;
+        document.getElementById('form-shift-ci-period').value = p;
       }
     }
 
     function setDefaultDate() {
       const today = new Date().toISOString().split('T')[0];
-      const newCiDate = document.getElementById('shift-ci-date');
+      const newCiDate = document.getElementById('form-shift-ci-date');
       if (newCiDate && !newCiDate.disabled) {
         newCiDate.value = today;
       }
     }
 
-    function getTimeString(hour, minute, period, dateVal) {
-      return { date: dateVal, time: `${hour}:${minute} ${period}` };
+    function setDefaultReportDates(fromId, toId) {
+      const today = new Date();
+      const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+      document.getElementById(fromId).value = firstDay.toISOString().split('T')[0];
+      document.getElementById(toId).value = today.toISOString().split('T')[0];
+    }
+
+    function autoDetectShiftType(hourId, perId, targetId) {
+      const h = parseInt(document.getElementById(hourId).value, 10);
+      const p = document.getElementById(perId).value;
+      let hour24 = h;
+      if (p === 'PM' && h !== 12) hour24 += 12;
+      if (p === 'AM' && h === 12) hour24 = 0;
+      const shiftType = (hour24 >= 6 && hour24 < 18) ? 'Day' : 'Night';
+      document.getElementById(targetId).value = shiftType;
     }
 
     /* ─── Modal Helpers ─── */
-    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function openModal(id) { document.getElementById(id).classList.remove('js-hidden'); }
 
-    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('js-hidden'); }
 
     function showAlert(msg) {
       document.getElementById('modal-alert-msg').textContent = msg;
@@ -1053,12 +1465,36 @@ MODALS
 
     document.getElementById('modal-alert-ok').addEventListener('click', () => closeModal('modal-alert'));
 
-    /* ─── View Management ─── */
+    /* ─── View & Role Swapping ─── */
     function showView(viewId) {
       ['login-view', 'employee-view', 'admin-view'].forEach(id => {
-        document.getElementById(id).classList.add('hidden');
+        document.getElementById(id).classList.add('js-hidden');
       });
-      document.getElementById(viewId).classList.remove('hidden');
+      document.getElementById(viewId).classList.remove('js-hidden');
+    }
+
+    function switchViewMode(mode) {
+      if (mode === 'admin') {
+        if (!state.isAdmin) {
+          state.isDemoAdmin = true;
+          document.getElementById('admin-demo-banner').classList.remove('js-hidden');
+        } else {
+          state.isDemoAdmin = false;
+          document.getElementById('admin-demo-banner').classList.add('js-hidden');
+        }
+        showView('admin-view');
+        switchAdminTab('overview');
+      } else {
+        state.isDemoAdmin = false;
+        showView('employee-view');
+        switchEmployeeTab('dashboard');
+      }
+      if (document.getElementById('role-switcher-emp')) {
+        document.getElementById('role-switcher-emp').value = mode;
+      }
+      if (document.getElementById('role-switcher-adm')) {
+        document.getElementById('role-switcher-adm').value = mode;
+      }
     }
 
     /* ─── Login ─── */
@@ -1066,7 +1502,7 @@ MODALS
       e.preventDefault();
       const password = document.getElementById('login-password').value;
       const errEl = document.getElementById('login-error');
-      errEl.classList.add('hidden');
+      errEl.classList.add('js-hidden');
       try {
         const data = await api('/api/auth/login', {
           method: 'POST',
@@ -1077,6 +1513,11 @@ MODALS
         state.isAdmin = data.is_admin;
         state.employeeName = data.name;
         localStorage.setItem('token', state.token);
+        
+        // Show role switcher containers
+        document.getElementById('switcher-container-emp').classList.remove('js-hidden');
+        document.getElementById('switcher-container-adm').classList.remove('js-hidden');
+
         if (data.is_admin) {
           initAdmin();
         } else {
@@ -1084,160 +1525,134 @@ MODALS
         }
       } catch (err) {
         errEl.textContent = err.message;
-        errEl.classList.remove('hidden');
+        errEl.classList.remove('js-hidden');
       }
     });
 
-    /* ─── Employee ─── */
+    /* ─── Employee Tab Controller ─── */
     async function initEmployee() {
       showView('employee-view');
       document.getElementById('emp-sidebar-name').textContent = state.employeeName;
       document.getElementById('emp-avatar').textContent = state.employeeName.charAt(0).toUpperCase();
       userChangedTime = false;
-      await loadEmployeeSites();
-      await loadEmployeeData();
+      switchEmployeeTab('dashboard');
     }
 
-    async function loadEmployeeSites() {
-      try {
-        const sites = await api('/api/employee/sites');
-        const select = document.getElementById('shift-site');
-        select.innerHTML = '<option value="">None</option>';
-        sites.forEach(s => {
-          select.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-        });
-      } catch (err) { /* noop */ }
+    function switchEmployeeTab(tabName) {
+      const dashboardTab = document.getElementById('emp-tab-dashboard');
+      const reportsTab = document.getElementById('emp-tab-reports');
+      const analyticsTab = document.getElementById('emp-tab-analytics');
+      const settingsTab = document.getElementById('emp-tab-settings');
+      
+      dashboardTab.classList.add('js-hidden');
+      reportsTab.classList.add('js-hidden');
+      analyticsTab.classList.add('js-hidden');
+      settingsTab.classList.add('js-hidden');
+
+      if (tabName === 'dashboard') {
+        dashboardTab.classList.remove('js-hidden');
+        document.getElementById('emp-header-title').textContent = 'Employee Dashboard';
+        loadEmployeeData();
+      } else if (tabName === 'reports') {
+        reportsTab.classList.remove('js-hidden');
+        document.getElementById('emp-header-title').textContent = 'My Timesheets';
+        loadEmployeeReports();
+      } else if (tabName === 'team-analytics') {
+        analyticsTab.classList.remove('js-hidden');
+        document.getElementById('emp-header-title').textContent = 'Team Analytics';
+      } else if (tabName === 'settings') {
+        settingsTab.classList.remove('js-hidden');
+        document.getElementById('emp-header-title').textContent = 'Profile Settings';
+        document.getElementById('settings-emp-name').textContent = state.employeeName;
+      }
+      
+      document.querySelectorAll('aside .employee-tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      document.querySelectorAll('nav .employee-tab-btn').forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+          btn.classList.add('bg-indigo-100', 'text-indigo-700');
+          btn.classList.remove('text-slate-500', 'hover:text-slate-700');
+        } else {
+          btn.classList.remove('bg-indigo-100', 'text-indigo-700');
+          btn.classList.add('text-slate-500', 'hover:text-slate-700');
+        }
+      });
     }
 
+    /* ─── Employee Dashboard Data ─── */
     async function loadEmployeeData() {
       try {
         const me = await api('/api/employee/me');
         document.getElementById('emp-sidebar-name').textContent = me.name;
         document.getElementById('emp-avatar').textContent = me.name.charAt(0).toUpperCase();
 
-        document.getElementById('emp-site').textContent = me.today_site ? `Assigned: ${me.today_site}` : 'No site assigned today';
-        document.getElementById('kpi-emp-site').textContent = me.today_site || 'None Assigned';
-
-        // Calculate hours for KPI cards
+        // Weekly & Monthly calculations
         const weekData = await api('/api/employee/hours/week');
         let weekSum = 0;
         if (weekData) {
           weekSum = Object.values(weekData).reduce((a, b) => a + b, 0);
         }
-        document.getElementById('kpi-emp-week-hours').textContent = `${weekSum.toFixed(2)} h`;
+        document.getElementById('kpi-emp-week-hours').textContent = `${weekSum.toFixed(2)} hrs`;
+        const weekPct = Math.min((weekSum / 40) * 100, 100);
+        document.getElementById('kpi-emp-week-progress').style.width = `${weekPct}%`;
 
         const monthData = await api('/api/employee/hours/month');
         let monthSum = 0;
         if (monthData && monthData.data) {
           monthSum = monthData.data.reduce((a, b) => a + b, 0);
         }
-        document.getElementById('kpi-emp-month-hours').textContent = `${monthSum.toFixed(2)} h`;
+        document.getElementById('kpi-emp-month-hours').textContent = `${monthSum.toFixed(2)} hrs`;
+        const monthPct = Math.min((monthSum / 160) * 100, 100);
+        document.getElementById('kpi-emp-month-progress').style.width = `${monthPct}%`;
 
+        // Active shift logic
         const active = await api('/api/employee/active-shift');
         const banner = document.getElementById('active-shift-banner');
-        const saveBtn = document.getElementById('btn-save-shift');
-        const saveBtnText = document.getElementById('btn-save-shift-text');
-        
-        // Form elements
-        const ciDateEl = document.getElementById('shift-ci-date');
-        const ciHourEl = document.getElementById('shift-ci-hour');
-        const ciMinEl = document.getElementById('shift-ci-minute');
-        const ciPerEl = document.getElementById('shift-ci-period');
-        
-        const coDateEl = document.getElementById('shift-co-date');
-        const coHourEl = document.getElementById('shift-co-hour');
-        const coMinEl = document.getElementById('shift-co-minute');
-        const coPerEl = document.getElementById('shift-co-period');
-        
-        const siteEl = document.getElementById('shift-site');
-
-        const statusTextEl = document.getElementById('kpi-emp-status');
-        const statusPillEl = document.getElementById('kpi-emp-status-pill');
+        const clockBtn = document.getElementById('btn-clock-action');
+        const clockText = clockBtn.querySelector('span');
+        const timerText = document.getElementById('running-timer');
+        const categorySelect = document.getElementById('clock-task-category');
 
         if (active.active) {
-          statusTextEl.textContent = 'Clocked In';
-          statusPillEl.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0';
-
-          banner.classList.remove('hidden');
+          banner.classList.remove('js-hidden');
           document.getElementById('active-clock-in').textContent = active.clock_in;
+          document.getElementById('kpi-emp-shift-type').textContent = active.shift_type;
 
-          ciDateEl.disabled = true;
-          ciHourEl.disabled = true;
-          ciMinEl.disabled = true;
-          ciPerEl.disabled = true;
+          clockBtn.className = 'w-full py-3 bg-rose-600 hover:bg-rose-700 text-white font-semibold rounded-xl transition text-base shadow-md flex items-center justify-center gap-2';
+          clockText.textContent = 'Clock Out';
+          categorySelect.disabled = true;
 
-          ciDateEl.value = active.date;
-          const ciParts = active.clock_in.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
-          if (ciParts) {
-            ciHourEl.value = ciParts[1].padStart(2, '0');
-            ciMinEl.value = ciParts[2];
-            ciPerEl.value = ciParts[3];
-          }
-
-          if (active.site_id) {
-            siteEl.value = active.site_id;
-          }
-
-          if (!userChangedTime) {
-            const now = new Date();
-            let h = now.getHours();
-            const m = now.getMinutes();
-            const p = h >= 12 ? 'PM' : 'AM';
-            if (h > 12) h -= 12;
-            if (h === 0) h = 12;
-            const hh = h < 10 ? '0' + h : '' + h;
-            const mm = Math.floor(m / 5) * 5;
-            const mmStr = mm < 10 ? '0' + mm : '' + mm;
-            coDateEl.value = now.toISOString().split('T')[0];
-            coHourEl.value = hh;
-            coMinEl.value = mmStr;
-            coPerEl.value = p;
-          }
-
-          saveBtn.className = 'w-full py-2.5 btn-danger text-sm font-semibold flex items-center justify-center gap-2';
-          saveBtnText.textContent = 'End Shift';
-          document.getElementById('shift-log-title').textContent = 'End Running Shift';
-        } else {
-          statusTextEl.textContent = 'Not Clocked In';
-          statusPillEl.className = 'w-2.5 h-2.5 rounded-full bg-red-500 shrink-0';
-
-          banner.classList.add('hidden');
-
-          ciDateEl.disabled = false;
-          ciHourEl.disabled = false;
-          ciMinEl.disabled = false;
-          ciPerEl.disabled = false;
-
-          if (!userChangedTime) {
-            const now = new Date();
-            let h = now.getHours();
-            const m = now.getMinutes();
-            const p = h >= 12 ? 'PM' : 'AM';
-            if (h > 12) h -= 12;
-            if (h === 0) h = 12;
-            const hh = h < 10 ? '0' + h : '' + h;
-            const mm = Math.floor(m / 5) * 5;
-            const mmStr = mm < 10 ? '0' + mm : '' + mm;
-            ciDateEl.value = now.toISOString().split('T')[0];
-            ciHourEl.value = hh;
-            ciMinEl.value = mmStr;
-            ciPerEl.value = p;
-
-            if (me.today_site_id) {
-              siteEl.value = me.today_site_id;
-            } else {
-              siteEl.value = '';
+          // Timer math
+          const startTime = new Date(active.clock_in_datetime);
+          if (window.timerInterval) clearInterval(window.timerInterval);
+          window.timerInterval = setInterval(() => {
+            const elapsed = new Date() - startTime;
+            if (elapsed < 0) {
+              timerText.textContent = '00:00:00';
+              return;
             }
+            const totalSec = Math.floor(elapsed / 1000);
+            const hrs = Math.floor(totalSec / 3600);
+            const mins = Math.floor((totalSec % 3600) / 60);
+            const secs = totalSec % 60;
+            timerText.textContent = `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+          }, 1000);
 
-            coDateEl.value = '';
-            coHourEl.value = '12';
-            coMinEl.value = '00';
-            coPerEl.value = 'AM';
-          }
+        } else {
+          banner.classList.add('js-hidden');
+          document.getElementById('kpi-emp-shift-type').textContent = 'None';
+          clockBtn.className = 'w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-base shadow-md flex items-center justify-center gap-2';
+          clockText.textContent = 'Clock In';
+          categorySelect.disabled = false;
 
-          saveBtn.className = 'w-full py-2.5 btn-primary text-sm font-semibold flex items-center justify-center gap-2';
-          saveBtnText.textContent = 'Log Shift';
-          document.getElementById('shift-log-title').textContent = 'Log Shift';
+          if (window.timerInterval) clearInterval(window.timerInterval);
+          timerText.textContent = '00:00:00';
         }
 
         await loadEmployeeCharts();
@@ -1247,40 +1662,65 @@ MODALS
       }
     }
 
+    /* ─── Real-Time Clock In / Out Tracker Button ─── */
+    document.getElementById('btn-clock-action').addEventListener('click', async () => {
+      const active = await api('/api/employee/active-shift');
+      const msgEl = document.getElementById('clock-message');
+      msgEl.textContent = '';
+      msgEl.className = 'mt-2 text-xs text-center font-medium';
+
+      const timeStr = getCurrentTime12h();
+      const dateStr = getCurrentDateISO();
+
+      try {
+        if (active.active) {
+          // Clock Out
+          const result = await api('/api/employee/clock-out', {
+            method: 'POST',
+            body: JSON.stringify({ date: dateStr, time: timeStr })
+          });
+          msgEl.textContent = result.message || 'Clock out successful';
+          msgEl.className = 'mt-2 text-xs text-center font-medium text-emerald-600';
+        } else {
+          // Clock In
+          const result = await api('/api/employee/clock-in', {
+            method: 'POST',
+            body: JSON.stringify({ date: dateStr, time: timeStr })
+          });
+          msgEl.textContent = result.message || 'Clock in successful';
+          msgEl.className = 'mt-2 text-xs text-center font-medium text-emerald-600';
+        }
+        await loadEmployeeData();
+      } catch (err) {
+        msgEl.textContent = err.message;
+        msgEl.className = 'mt-2 text-xs text-center font-medium text-rose-600';
+      }
+    });
+
+    /* ─── Employee Weekly Bar Chart ─── */
     async function loadEmployeeCharts() {
       try {
         const weekData = await api('/api/employee/hours/week');
-        const shifts = await api('/api/employee/shifts?limit=100');
 
         if (state.weeklyChart) { state.weeklyChart.destroy(); }
-        if (state.empDonutChart) { state.empDonutChart.destroy(); }
 
-        // Area chart
-        state.weeklyChart = new Chart(document.getElementById('weekly-chart'), {
-          type: 'line',
+        const ctx = document.getElementById('weekly-chart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, 'rgba(79, 70, 229, 0.85)');
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0.1)');
+
+        state.weeklyChart = new Chart(ctx, {
+          type: 'bar',
           data: {
             labels: Object.keys(weekData),
             datasets: [{
-              label: 'Hours',
+              label: 'Working Hours',
               data: Object.values(weekData),
-              borderColor: '#6366f1',
-              borderWidth: 2.5,
-              tension: 0.4,
-              fill: true,
-              backgroundColor: function(context) {
-                const chart = context.chart;
-                const {ctx, chartArea} = chart;
-                if (!chartArea) return null;
-                const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                gradient.addColorStop(0, 'rgba(99, 102, 241, 0.4)');
-                gradient.addColorStop(1, 'rgba(99, 102, 241, 0.0)');
-                return gradient;
-              },
-              pointBackgroundColor: '#6366f1',
-              pointHoverBackgroundColor: '#fff',
-              pointHoverBorderColor: '#6366f1',
-              pointHoverRadius: 6,
-              pointRadius: 4,
+              backgroundColor: gradient,
+              borderColor: '#4f46e5',
+              borderWidth: 1.5,
+              borderRadius: 6,
+              hoverBackgroundColor: '#4338ca',
             }]
           },
           options: {
@@ -1292,162 +1732,171 @@ MODALS
             scales: {
               x: {
                 grid: { display: false },
-                ticks: { color: '#94a3b8' }
+                ticks: { font: { weight: 600 } }
               },
               y: {
                 beginAtZero: true,
-                ticks: { color: '#94a3b8' },
-                title: { display: true, text: 'Hours', color: '#94a3b8' }
+                title: { display: true, text: 'Hours', font: { weight: 600 } }
               }
             }
           }
         });
 
-        // Donut chart
-        const siteHours = {};
-        shifts.forEach(s => {
-          if (s.hours && s.site) {
-            siteHours[s.site] = (siteHours[s.site] || 0) + s.hours;
-          }
-        });
-
-        let labels = Object.keys(siteHours);
-        let data = Object.values(siteHours);
-        let backgroundColors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
-        
-        if (labels.length === 0) {
-          labels = ['No Shifts Logged'];
-          data = [1];
-          backgroundColors = ['#1f293d'];
-        }
-
-        state.empDonutChart = new Chart(document.getElementById('emp-donut-chart'), {
-          type: 'doughnut',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: data,
-              backgroundColor: backgroundColors,
-              borderWidth: 1,
-              borderColor: '#141822',
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: {
-                  boxWidth: 12,
-                  padding: 15,
-                  color: '#94a3b8',
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    if (labels[0] === 'No Shifts Logged') return 'No Shifts';
-                    return ` ${context.label}: ${context.raw.toFixed(2)} hrs`;
-                  }
-                }
-              }
-            },
-            cutout: '75%',
-          }
-        });
-
       } catch (err) { /* noop */ }
     }
 
+    /* ─── Load Employee Logs Table ─── */
     async function loadEmployeeShifts() {
       try {
         const shifts = await api('/api/employee/shifts');
-        const tbody = document.getElementById('emp-shifts-body');
-        const empty = document.getElementById('emp-shifts-empty');
-        tbody.innerHTML = '';
-        if (shifts.length === 0) {
-          empty.classList.remove('hidden');
-          return;
-        }
-        empty.classList.add('hidden');
-        shifts.forEach(s => {
-          const tr = document.createElement('tr');
-          tr.className = 'text-slate-300 border-b border-[var(--border-color)]';
-          tr.innerHTML = `
-          <td class="py-3.5 pr-3 font-medium text-slate-100">${s.date}</td>
-          <td class="py-3.5 pr-3">${s.clock_in}</td>
-          <td class="py-3.5 pr-3">${s.clock_out || '—'}</td>
-          <td class="py-3.5 pr-3 font-medium text-slate-200">${s.hours != null ? s.hours.toFixed(2) : '—'}</td>
-          <td class="py-3.5 text-slate-300">${s.site || '—'}</td>
-        `;
-          tbody.appendChild(tr);
-        });
+        state.empDashboardShifts = shifts;
+        
+        // Render KPIs days worked & average hours
+        const activeDays = new Set(shifts.filter(s => s.hours > 0).map(s => s.date)).size;
+        const totalHrs = shifts.reduce((sum, s) => sum + (s.hours || 0), 0);
+        const avgHrs = activeDays > 0 ? (totalHrs / activeDays) : 0;
+        
+        document.getElementById('kpi-emp-days').textContent = `${activeDays} / 22 Days`;
+        document.getElementById('kpi-emp-avg').textContent = `${avgHrs.toFixed(2)} hrs/day`;
+
+        renderEmployeeShiftsTable();
       } catch (err) { /* noop */ }
     }
 
-    /* Submit Employee Shift Form */
-    document.getElementById('employee-shift-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const siteId = document.getElementById('shift-site').value;
-      const ciDate = document.getElementById('shift-ci-date').value;
-      const ciHour = document.getElementById('shift-ci-hour').value;
-      const ciMin = document.getElementById('shift-ci-minute').value;
-      const ciPer = document.getElementById('shift-ci-period').value;
-
-      const coDate = document.getElementById('shift-co-date').value;
-      const coHour = document.getElementById('shift-co-hour').value;
-      const coMin = document.getElementById('shift-co-minute').value;
-      const coPer = document.getElementById('shift-co-period').value;
-
-      const msgEl = document.getElementById('shift-message');
-      msgEl.textContent = '';
-      msgEl.className = 'mt-3 text-sm text-slate-500';
-
-      const body = {
-        site_id: siteId ? parseInt(siteId) : null,
-        clock_in_date: ciDate,
-        clock_in_time: `${ciHour}:${ciMin} ${ciPer}`,
-        clock_out_date: coDate || null,
-        clock_out_time: coDate ? `${coHour}:${coMin} ${coPer}` : null,
-      };
-
-      try {
-        const result = await api('/api/employee/shifts', {
-          method: 'POST',
-          body: JSON.stringify(body),
-        });
-        msgEl.textContent = result.message || 'Shift logged successfully';
-        msgEl.className = 'mt-3 text-sm text-emerald-400 font-medium';
-        userChangedTime = false;
-        await loadEmployeeData();
-      } catch (err) {
-        msgEl.textContent = err.message;
-        msgEl.className = 'mt-3 text-sm text-red-400 font-medium';
+    function renderEmployeeShiftsTable() {
+      const tbody = document.getElementById('emp-shifts-body');
+      const empty = document.getElementById('emp-shifts-empty');
+      tbody.innerHTML = '';
+      
+      const shifts = [...(state.empDashboardShifts || [])];
+      if (shifts.length === 0) {
+        empty.classList.remove('js-hidden');
+        return;
       }
+      empty.classList.add('js-hidden');
+
+      const sort = sortStates.empShifts;
+      sortData(shifts, sort.col, sort.order);
+
+      const categories = ["Design System", "Product Development", "Customer Support", "Marketing", "Administrative"];
+
+      shifts.forEach((s, idx) => {
+        const dayName = new Date(s.date).toLocaleDateString('en-US', { weekday: 'short' });
+        const category = categories[idx % categories.length];
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition duration-150';
+        tr.innerHTML = `
+          <td class="py-3 px-2 font-semibold text-slate-900">${s.date}</td>
+          <td class="py-3 px-2 text-slate-500">${dayName}</td>
+          <td class="py-3 px-2 font-medium text-slate-700">${category}</td>
+          <td class="py-3 px-2 font-mono text-slate-600">${s.clock_in}</td>
+          <td class="py-3 px-2 font-mono text-slate-600">${s.clock_out || '—'}</td>
+          <td class="py-3 px-2 text-slate-500">30m</td>
+          <td class="py-3 px-2 font-semibold text-slate-800">${s.hours != null ? s.hours.toFixed(2) : '—'} h</td>
+          <td class="py-3 px-2">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.clock_out ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-amber-50 text-amber-800 border border-amber-100'}">
+              ${s.clock_out ? 'Approved' : 'Active'}
+            </span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* ─── Employee Detailed Reports View ─── */
+    async function loadEmployeeReports() {
+      try {
+        let fromDate = document.getElementById('emp-report-from').value;
+        let toDate = document.getElementById('emp-report-to').value;
+        
+        if (!fromDate || !toDate) {
+          setDefaultReportDates('emp-report-from', 'emp-report-to');
+          fromDate = document.getElementById('emp-report-from').value;
+          toDate = document.getElementById('emp-report-to').value;
+        }
+        
+        let url = `/api/employee/reports?date_from=${fromDate}&date_to=${toDate}`;
+        const data = await api(url);
+        
+        document.getElementById('report-emp-total-hours').textContent = `${data.summary.total_hours.toFixed(2)} h`;
+        document.getElementById('report-emp-day-hours').textContent = `${data.summary.day_hours.toFixed(2)} h`;
+        document.getElementById('report-emp-night-hours').textContent = `${data.summary.night_hours.toFixed(2)} h`;
+        
+        state.empReportShifts = data.shifts;
+        renderEmployeeReportsTable();
+      } catch (err) {
+        showAlert(err.message);
+      }
+    }
+
+    function renderEmployeeReportsTable() {
+      const tbody = document.getElementById('emp-report-body');
+      const empty = document.getElementById('emp-report-empty');
+      tbody.innerHTML = '';
+      
+      const shifts = [...(state.empReportShifts || [])];
+      if (shifts.length === 0) {
+        empty.classList.remove('js-hidden');
+        return;
+      }
+      empty.classList.add('js-hidden');
+      
+      const sort = sortStates.empReport;
+      sortData(shifts, sort.col, sort.order);
+      
+      shifts.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition';
+        tr.innerHTML = `
+          <td class="py-3.5 px-2 font-semibold text-slate-900">${s.date}</td>
+          <td class="py-3.5 px-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-indigo-50 text-indigo-800 border border-indigo-100'}">
+              ${s.shift_type}
+            </span>
+          </td>
+          <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_in}</td>
+          <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_out || '—'}</td>
+          <td class="py-3.5 px-2 font-semibold text-slate-900">${s.hours != null ? s.hours.toFixed(2) : '—'} h</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    /* Modal Form for Logging Past Shifts Manually */
+    document.getElementById('btn-open-log-modal').addEventListener('click', () => {
+      document.getElementById('modal-shift-title').textContent = 'Log Past Shift';
+      document.getElementById('form-shift-id').value = '';
+      document.getElementById('admin-only-shift-field').classList.add('js-hidden');
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('form-shift-ci-date').value = today;
+      document.getElementById('form-shift-ci-hour').value = '08';
+      document.getElementById('form-shift-ci-minute').value = '00';
+      document.getElementById('form-shift-ci-period').value = 'AM';
+      document.getElementById('form-shift-co-date').value = today;
+      document.getElementById('form-shift-co-hour').value = '05';
+      document.getElementById('form-shift-co-minute').value = '00';
+      document.getElementById('form-shift-co-period').value = 'PM';
+      document.getElementById('form-shift-type').value = 'Day';
+      openModal('modal-shift');
     });
 
-    /* ─── Admin ─── */
+    /* ─── Admin Controller ─── */
     async function initAdmin() {
       showView('admin-view');
       await loadAdminData();
       await loadAdminEmployees();
-      await loadAdminSites();
-      await loadAdminSchedules();
       switchAdminTab('overview');
     }
 
     function switchAdminTab(tabName) {
-      // Hide all tab contents
-      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('hidden'));
-      // Show selected tab content
+      document.querySelectorAll('.tab-content').forEach(tc => tc.classList.add('js-hidden'));
       const targetTab = document.getElementById('tab-' + tabName);
       if (targetTab) {
-        targetTab.classList.remove('hidden');
+        targetTab.classList.remove('js-hidden');
         targetTab.classList.add('fade-in');
       }
 
-      // Update sidebar desktop buttons
       document.querySelectorAll('aside .admin-tab-btn').forEach(btn => {
         if (btn.dataset.tab === tabName) {
           btn.classList.add('active');
@@ -1456,88 +1905,130 @@ MODALS
         }
       });
 
-      // Update mobile tab buttons
       document.querySelectorAll('nav .admin-tab-btn').forEach(btn => {
         if (btn.dataset.tab === tabName) {
-          btn.classList.add('bg-indigo-500/15', 'text-indigo-400', 'font-semibold');
-          btn.classList.remove('text-[var(--text-muted)]', 'hover:text-slate-200');
+          btn.classList.add('bg-indigo-100', 'text-indigo-700');
+          btn.classList.remove('text-slate-500', 'hover:text-slate-700');
         } else {
-          btn.classList.remove('bg-indigo-500/15', 'text-indigo-400', 'font-semibold');
-          btn.classList.add('text-[var(--text-muted)]', 'hover:text-slate-200');
+          btn.classList.remove('bg-indigo-100', 'text-indigo-700');
+          btn.classList.add('text-slate-500', 'hover:text-slate-700');
         }
       });
 
-      // Load appropriate tab data
+      if (adminPollInterval) {
+        clearInterval(adminPollInterval);
+        adminPollInterval = null;
+      }
+
       if (tabName === 'overview') {
         loadAdminDashboard();
-        document.getElementById('admin-header-title').textContent = 'Admin Dashboard';
-      } else if (tabName === 'shifts') {
-        loadAdminShifts();
-        document.getElementById('admin-header-title').textContent = 'Shift Records';
-      } else if (tabName === 'employees') {
-        loadAdminEmployees();
-        document.getElementById('admin-header-title').textContent = 'Manage Employees';
-      } else if (tabName === 'sites') {
-        loadAdminSites();
-        loadAdminSchedules();
-        document.getElementById('admin-header-title').textContent = 'Sites & Scheduling';
+        document.getElementById('admin-header-title').textContent = 'Admin Overview';
+        adminPollInterval = setInterval(loadAdminDashboard, 30000);
+      } else if (tabName === 'reports') {
+        switchAdminSubTab('admin-reports-view');
+        document.getElementById('admin-header-title').textContent = 'Team Analytics';
+      } else if (tabName === 'settings') {
+        document.getElementById('admin-header-title').textContent = 'Workspace Settings';
       }
     }
 
+    /* Admin Subtab manager inside reports view */
+    function switchAdminSubTab(subtabName) {
+      document.querySelectorAll('.subtab-content').forEach(content => content.classList.add('js-hidden'));
+      const target = document.getElementById('sub-' + subtabName);
+      if (target) {
+        target.classList.remove('js-hidden');
+        target.classList.add('fade-in');
+      }
+
+      document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+        if (btn.dataset.subtab === subtabName) {
+          btn.classList.add('bg-indigo-100', 'text-indigo-700');
+          btn.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:bg-slate-50');
+        } else {
+          btn.classList.remove('bg-indigo-100', 'text-indigo-700');
+          btn.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-slate-50');
+        }
+      });
+
+      if (subtabName === 'admin-reports-view') {
+        loadAdminReports();
+      } else if (subtabName === 'admin-shifts-view') {
+        loadAdminShifts();
+      } else if (subtabName === 'admin-employees-view') {
+        loadAdminEmployees();
+      }
+    }
+
+    document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchAdminSubTab(btn.dataset.subtab);
+      });
+    });
+
     async function loadAdminData() {
-      // populate filter dropdowns
       try {
         const employees = await api('/api/admin/employees');
         const empFilter = document.getElementById('filter-employee');
-        const schedEmp = document.getElementById('sched-employee');
         const shiftEmp = document.getElementById('form-shift-employee');
+        const reportEmp = document.getElementById('admin-report-employee');
+
         empFilter.innerHTML = '<option value="">All Employees</option>';
-        schedEmp.innerHTML = '<option value="">Select Employee</option>';
         shiftEmp.innerHTML = '<option value="">Select</option>';
+        if (reportEmp) {
+          reportEmp.innerHTML = '<option value="">All Employees</option>';
+        }
+
         employees.forEach(e => {
           if (!e.is_admin && e.active) {
             empFilter.innerHTML += `<option value="${e.id}">${e.name}</option>`;
-            schedEmp.innerHTML += `<option value="${e.id}">${e.name}</option>`;
             shiftEmp.innerHTML += `<option value="${e.id}">${e.name}</option>`;
+            if (reportEmp) {
+              reportEmp.innerHTML += `<option value="${e.id}">${e.name}</option>`;
+            }
           }
         });
       } catch (err) { /* noop */ }
-      await loadAdminDashboard();
     }
 
+    /* Admin Dashboard KPIs and History */
     async function loadAdminDashboard() {
       try {
-        const data = await api('/api/admin/dashboard');
-        document.getElementById('stat-active').textContent = data.active_shifts;
-        document.getElementById('stat-employees').textContent = data.total_employees;
+        const [dashData, directory, history] = await Promise.all([
+          api('/api/admin/dashboard'),
+          api('/api/admin/directory'),
+          api('/api/admin/hours/monthly-history'),
+        ]);
 
-        // Sum weekly hours for KPI card
-        const weekHours = Object.values(data.weekly_hours).reduce((a, b) => a + b, 0);
-        document.getElementById('stat-hours').textContent = `${weekHours.toFixed(2)} h`;
+        const teamHours = Object.values(dashData.weekly_hours).reduce((a, b) => a + b, 0);
+        document.getElementById('stat-team-hours').textContent = `${teamHours.toFixed(2)} hrs`;
+        document.getElementById('stat-active-employees').textContent = `${dashData.active_shifts} / ${dashData.total_employees}`;
 
-        // Load sites to update site KPI count
-        let sitesCount = 0;
-        try {
-          const sites = await api('/api/admin/sites');
-          sitesCount = sites.filter(s => s.active).length;
-        } catch (e) { /* noop */ }
-        document.getElementById('stat-sites').textContent = sitesCount;
+        const pendingCount = directory.filter(e => e.monthly_hours > 40 || (e.monthly_hours > 0 && e.monthly_hours < 5)).length;
+        document.getElementById('stat-pending').textContent = pendingCount || 0;
 
-        const names = Object.keys(data.weekly_hours);
-        const weekVals = Object.values(data.weekly_hours);
+        const overtimeCount = directory.filter(e => e.weekly_hours > 40).length;
+        document.getElementById('stat-overtime').textContent = overtimeCount || 0;
 
-        if (state.adminWeeklyChart) state.adminWeeklyChart.destroy();
+        if (state.adminMonthlyChart) state.adminMonthlyChart.destroy();
+        
+        const ctx = document.getElementById('admin-monthly-chart').getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, '#4f46e5');
+        gradient.addColorStop(1, 'rgba(79, 70, 229, 0.15)');
 
-        state.adminWeeklyChart = new Chart(document.getElementById('admin-weekly-chart'), {
+        state.adminMonthlyChart = new Chart(ctx, {
           type: 'bar',
           data: {
-            labels: names,
+            labels: history.map(m => m.month),
             datasets: [{
-              label: 'Weekly Hours',
-              data: weekVals,
-              backgroundColor: '#6366f1',
+              label: 'Total Team Hours',
+              data: history.map(m => m.hours),
+              backgroundColor: history.map((_, i) =>
+                i === history.length - 1 ? '#4f46e5' : '#cbd5e1'
+              ),
               borderRadius: 6,
-              borderWidth: 0,
+              hoverBackgroundColor: '#4338ca',
             }]
           },
           options: {
@@ -1549,84 +2040,114 @@ MODALS
             scales: {
               x: {
                 grid: { display: false },
-                ticks: { color: '#94a3b8' }
+                ticks: { font: { weight: 600 } }
               },
               y: {
                 beginAtZero: true,
-                ticks: { color: '#94a3b8' },
-                title: { display: true, text: 'Hours', color: '#94a3b8' }
+                ticks: { font: { weight: 600 } }
               }
             }
           }
         });
 
-        // Render company-wide site distribution donut chart by aggregating all admin shifts
-        let shifts = [];
-        try {
-          shifts = await api('/api/admin/shifts');
-        } catch (e) { /* noop */ }
-
-        const siteHours = {};
-        shifts.forEach(s => {
-          if (s.hours && s.site) {
-            siteHours[s.site] = (siteHours[s.site] || 0) + s.hours;
-          }
-        });
-
-        let labels = Object.keys(siteHours);
-        let donutData = Object.values(siteHours);
-        let backgroundColors = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
-        
-        if (labels.length === 0) {
-          labels = ['No Shifts Logged'];
-          donutData = [1];
-          backgroundColors = ['#1f293d'];
-        }
-
-        if (state.adminDonutChart) state.adminDonutChart.destroy();
-
-        state.adminDonutChart = new Chart(document.getElementById('admin-donut-chart'), {
-          type: 'doughnut',
-          data: {
-            labels: labels,
-            datasets: [{
-              data: donutData,
-              backgroundColor: backgroundColors,
-              borderWidth: 1,
-              borderColor: '#141822',
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'bottom',
-                labels: {
-                  boxWidth: 12,
-                  padding: 15,
-                  color: '#94a3b8',
-                }
-              },
-              tooltip: {
-                callbacks: {
-                  label: function(context) {
-                    if (labels[0] === 'No Shifts Logged') return 'No Shifts';
-                    return ` ${context.label}: ${context.raw.toFixed(2)} hrs`;
-                  }
-                }
-              }
-            },
-            cutout: '75%',
-          }
-        });
-
+        renderAdminDirectory(directory);
       } catch (err) {
         showAlert(err.message);
       }
     }
 
-    /* Admin - Shifts */
+    /* Master Employee Directory Renderer */
+    function renderAdminDirectory(employees) {
+      if (employees) {
+        state.adminDirectoryRaw = employees;
+      }
+      
+      const tbody = document.getElementById('admin-directory-body');
+      const empty = document.getElementById('admin-directory-empty');
+      tbody.innerHTML = '';
+
+      const searchVal = (document.getElementById('dir-search').value || '').toLowerCase();
+      const filterDept = document.getElementById('dir-filter-dept').value;
+
+      const departments = ["Engineering", "Product", "UI/UX Design", "Customer Success", "Marketing"];
+      const roles = ["Software Engineer", "Product Manager", "Designer", "CS Specialist", "Marketing lead"];
+
+      let filtered = (state.adminDirectoryRaw || []).filter(e => {
+        const dept = departments[e.id % departments.length];
+        const matchSearch = e.name.toLowerCase().includes(searchVal);
+        const matchDept = !filterDept || dept === filterDept;
+        return matchSearch && matchDept;
+      });
+
+      if (filtered.length === 0) {
+        empty.classList.remove('js-hidden');
+        return;
+      }
+      empty.classList.add('js-hidden');
+
+      const sort = sortStates.adminDirectory;
+      
+      filtered.forEach(e => {
+        e.dept = departments[e.id % departments.length];
+      });
+
+      sortData(filtered, sort.col, sort.order);
+
+      filtered.forEach(e => {
+        const role = roles[e.id % roles.length];
+        const tr = document.createElement('tr');
+        const initial = e.name.charAt(0).toUpperCase();
+        const statusHtml = e.active_now
+          ? '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-100">Active</span>'
+          : '<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-100 text-slate-600 border border-slate-200">Offline</span>';
+        
+        tr.className = 'hover:bg-slate-50/50 border-b border-slate-100 transition';
+        tr.innerHTML = `
+          <td class="py-4 px-2">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold shrink-0 shadow-sm">${initial}</div>
+              <div>
+                <span class="font-semibold text-slate-900 block">${e.name}</span>
+                <span class="text-slate-400 text-xs">${role}</span>
+              </div>
+            </div>
+          </td>
+          <td class="py-4 px-2 font-medium text-slate-600">${e.dept}</td>
+          <td class="py-4 px-2 font-semibold text-slate-900">${e.weekly_hours.toFixed(2)} h</td>
+          <td class="py-4 px-2 font-semibold text-slate-900">${e.monthly_hours.toFixed(2)} h</td>
+          <td class="py-4 px-2 text-slate-500 font-medium">${e.days_worked} days</td>
+          <td class="py-4 px-2">${statusHtml}</td>
+          <td class="py-4 px-2">
+            <div class="flex items-center gap-3">
+              <button class="text-indigo-600 hover:text-indigo-800 text-xs font-bold transition" onclick="approveTimesheet(${e.id}, '${e.name}')">Approve</button>
+              <button class="text-slate-500 hover:text-slate-700 text-xs font-medium transition" onclick="viewEmployeeDetails(${e.id})">View Details</button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function approveTimesheet(id, name) {
+      showAlert(`Timesheet approved for ${name}`);
+    }
+
+    function viewEmployeeDetails(id) {
+      switchAdminTab('reports');
+      switchAdminSubTab('admin-shifts-view');
+      document.getElementById('filter-employee').value = id;
+      loadAdminShifts();
+    }
+
+    document.getElementById('dir-search').addEventListener('input', () => {
+      renderAdminDirectory();
+    });
+
+    document.getElementById('dir-filter-dept').addEventListener('change', () => {
+      renderAdminDirectory();
+    });
+
+    /* Admin - Shift Records Sub-view */
     async function loadAdminShifts() {
       try {
         const empId = document.getElementById('filter-employee').value;
@@ -1637,32 +2158,47 @@ MODALS
         if (from) url += `date_from=${from}&`;
         if (to) url += `date_to=${to}&`;
         const shifts = await api(url);
-        const tbody = document.getElementById('admin-shifts-body');
-        const empty = document.getElementById('admin-shifts-empty');
-        tbody.innerHTML = '';
-        if (shifts.length === 0) {
-          empty.classList.remove('hidden');
-          return;
-        }
-        empty.classList.add('hidden');
-        shifts.forEach(s => {
-          const tr = document.createElement('tr');
-          tr.className = 'text-slate-300 border-b border-[var(--border-color)]';
-          tr.innerHTML = `
-          <td class="py-3.5 pr-3 font-semibold text-slate-100">${s.employee_name}</td>
-          <td class="py-3.5 pr-3">${s.date}</td>
-          <td class="py-3.5 pr-3">${s.clock_in}</td>
-          <td class="py-3.5 pr-3">${s.clock_out || '—'}</td>
-          <td class="py-3.5 pr-3 font-medium text-slate-200">${s.hours != null ? s.hours.toFixed(2) : '—'}</td>
-          <td class="py-3.5 pr-3">${s.site || '—'}</td>
-          <td class="py-3.5">
-            <button class="text-indigo-400 hover:text-indigo-300 text-xs font-semibold mr-3" onclick="editShift(${s.id})">Edit</button>
-            <button class="text-red-400 hover:text-red-300 text-xs font-semibold" onclick="deleteShift(${s.id})">Delete</button>
+        state.adminShifts = shifts;
+        renderAdminShiftsTable();
+      } catch (err) { showAlert(err.message); }
+    }
+
+    function renderAdminShiftsTable() {
+      const tbody = document.getElementById('admin-shifts-body');
+      const empty = document.getElementById('admin-shifts-empty');
+      tbody.innerHTML = '';
+      
+      const shifts = [...(state.adminShifts || [])];
+      if (shifts.length === 0) {
+        empty.classList.remove('js-hidden');
+        return;
+      }
+      empty.classList.add('js-hidden');
+      
+      const sort = sortStates.adminShifts;
+      sortData(shifts, sort.col, sort.order);
+
+      shifts.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition';
+        tr.innerHTML = `
+          <td class="py-3.5 px-2 font-bold text-slate-900">${s.employee_name}</td>
+          <td class="py-3.5 px-2 text-slate-500 font-semibold">${s.date}</td>
+          <td class="py-3.5 px-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-indigo-50 text-indigo-800 border border-indigo-100'}">
+              ${s.shift_type}
+            </span>
+          </td>
+          <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_in}</td>
+          <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_out || '—'}</td>
+          <td class="py-3.5 px-2 font-bold text-slate-900">${s.hours != null ? s.hours.toFixed(2) : '—'} h</td>
+          <td class="py-3.5 px-2">
+            <button class="text-indigo-600 hover:text-indigo-800 text-xs font-bold mr-3" onclick="editShift(${s.id})">Edit</button>
+            <button class="text-rose-600 hover:text-rose-800 text-xs font-bold" onclick="deleteShift(${s.id})">Delete</button>
           </td>
         `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) { showAlert(err.message); }
+        tbody.appendChild(tr);
+      });
     }
 
     document.getElementById('btn-filter-shifts').addEventListener('click', loadAdminShifts);
@@ -1671,15 +2207,18 @@ MODALS
       document.getElementById('modal-shift-title').textContent = 'Add Shift';
       document.getElementById('form-shift-id').value = '';
       document.getElementById('form-shift-employee').value = '';
-      document.getElementById('form-shift-site').value = '';
-      document.getElementById('form-shift-ci-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('admin-only-shift-field').classList.remove('js-hidden');
+      
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('form-shift-ci-date').value = today;
       document.getElementById('form-shift-ci-hour').value = '08';
       document.getElementById('form-shift-ci-minute').value = '00';
       document.getElementById('form-shift-ci-period').value = 'AM';
-      document.getElementById('form-shift-co-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('form-shift-co-date').value = today;
       document.getElementById('form-shift-co-hour').value = '05';
       document.getElementById('form-shift-co-minute').value = '00';
       document.getElementById('form-shift-co-period').value = 'PM';
+      document.getElementById('form-shift-type').value = 'Day';
       openModal('modal-shift');
     });
 
@@ -1691,7 +2230,7 @@ MODALS
         document.getElementById('modal-shift-title').textContent = 'Edit Shift';
         document.getElementById('form-shift-id').value = s.id;
         document.getElementById('form-shift-employee').value = s.employee_id;
-        document.getElementById('form-shift-site').value = s.site_name || '';
+        document.getElementById('admin-only-shift-field').classList.remove('js-hidden');
 
         const ciParts = s.clock_in.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/);
         if (ciParts) {
@@ -1714,6 +2253,7 @@ MODALS
           document.getElementById('form-shift-co-period').value = 'PM';
         }
         document.getElementById('form-shift-co-date').value = s.date;
+        document.getElementById('form-shift-type').value = s.shift_type;
         openModal('modal-shift');
       } catch (err) { showAlert(err.message); }
     }
@@ -1724,57 +2264,59 @@ MODALS
       try {
         await api(`/api/admin/shifts/${id}`, { method: 'DELETE' });
         await loadAdminShifts();
+        await loadAdminDashboard();
       } catch (err) { showAlert(err.message); }
     }
     window.deleteShift = deleteShift;
 
+    /* Form Submit handler (shared between employee manual log and admin shifts management) */
     document.getElementById('form-shift').addEventListener('submit', async (e) => {
       e.preventDefault();
       const id = document.getElementById('form-shift-id').value;
-      const employee_id = document.getElementById('form-shift-employee').value;
-      const siteEl = document.getElementById('form-shift-site');
-      const siteElValue = siteEl.value;
-      let site_id = null;
-      if (siteElValue) {
-        try {
-          const sites = await api('/api/admin/sites');
-          const match = sites.find(s => s.name === siteElValue);
-          if (match) site_id = match.id;
-        } catch (e) { /* ignore */ }
-        if (!site_id && siteElValue) {
-          const opt = siteEl.options[siteEl.selectedIndex];
-          if (opt && opt.text && opt.value) {
-            site_id = parseInt(opt.value);
-          }
-        }
-      }
-
       const ci = getDateTimeFromSelects('form-shift-ci-hour', 'form-shift-ci-minute', 'form-shift-ci-period', 'form-shift-ci-date');
       let coDate = document.getElementById('form-shift-co-date').value;
       let coHour = document.getElementById('form-shift-co-hour').value;
       let coMin = document.getElementById('form-shift-co-minute').value;
       let coPer = document.getElementById('form-shift-co-period').value;
-      const body = {
-        employee_id: parseInt(employee_id),
-        site_id: site_id,
-        clock_in_date: ci.date,
-        clock_in_time: ci.time,
-        clock_out_date: coDate || null,
-        clock_out_time: coDate ? `${coHour}:${coMin} ${coPer}` : null,
-      };
+      const shiftType = document.getElementById('form-shift-type').value;
 
-      try {
-        if (id) {
-          await api(`/api/admin/shifts/${id}`, { method: 'PUT', body: JSON.stringify(body) });
-        } else {
-          await api('/api/admin/shifts', { method: 'POST', body: JSON.stringify(body) });
-        }
-        closeModal('modal-shift');
-        await loadAdminShifts();
-      } catch (err) { showAlert(err.message); }
+      // Conditional path depending on view context
+      if (!document.getElementById('admin-only-shift-field').classList.contains('js-hidden')) {
+        // Admin API path
+        const employee_id = document.getElementById('form-shift-employee').value;
+        const body = {
+          employee_id: parseInt(employee_id),
+          clock_in_date: ci.date,
+          clock_in_time: ci.time,
+          clock_out_date: coDate || null,
+          clock_out_time: coDate ? `${coHour}:${coMin} ${coPer}` : null,
+          shift_type: shiftType,
+        };
+        try {
+          const url = id ? `/api/admin/shifts/${id}` : '/api/admin/shifts';
+          const method = id ? 'PUT' : 'POST';
+          await api(url, { method, body: JSON.stringify(body) });
+          closeModal('modal-shift');
+          await loadAdminShifts();
+          await loadAdminDashboard();
+        } catch (err) { showAlert(err.message); }
+      } else {
+        const body = {
+          clock_in_date: ci.date,
+          clock_in_time: ci.time,
+          clock_out_date: coDate || null,
+          clock_out_time: coDate ? `${coHour}:${coMin} ${coPer}` : null,
+          shift_type: shiftType,
+        };
+        try {
+          await api('/api/employee/shifts', { method: 'POST', body: JSON.stringify(body) });
+          closeModal('modal-shift');
+          await loadEmployeeReports();
+        } catch (err) { showAlert(err.message); }
+      }
     });
 
-    /* Admin - Employees */
+    /* Admin - Employee list directory settings */
     async function loadAdminEmployees() {
       try {
         const employees = await api('/api/admin/employees');
@@ -1783,18 +2325,18 @@ MODALS
         employees.forEach(e => {
           if (e.is_admin) return;
           const tr = document.createElement('tr');
-          tr.className = 'text-slate-300 border-b border-[var(--border-color)]';
+          tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition';
           tr.innerHTML = `
-          <td class="py-3.5 pr-3 font-semibold text-slate-100">${e.name}</td>
-          <td class="py-3.5 pr-3">${e.is_admin ? 'Admin' : 'Employee'}</td>
-          <td class="py-3.5 pr-3">
-            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${e.active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'}">
+          <td class="py-3.5 px-2 font-semibold text-slate-900">${e.name}</td>
+          <td class="py-3.5 px-2 text-slate-500">Employee</td>
+          <td class="py-3.5 px-2">
+            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${e.active ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-slate-100 text-slate-600 border border-slate-200'}">
               ${e.active ? 'Active' : 'Inactive'}
             </span>
           </td>
-          <td class="py-3.5">
-            <button class="text-indigo-400 hover:text-indigo-300 text-xs font-semibold mr-3" onclick="editEmployee(${e.id}, '${e.name}')">Edit</button>
-            <button class="text-red-400 hover:text-red-300 text-xs font-semibold" onclick="deleteEmployee(${e.id})">Delete</button>
+          <td class="py-3.5 px-2">
+            <button class="text-indigo-600 hover:text-indigo-800 text-xs font-bold mr-3" onclick="editEmployee(${e.id}, '${e.name}')">Edit</button>
+            <button class="text-rose-600 hover:text-rose-800 text-xs font-bold" onclick="deleteEmployee(${e.id})">Delete</button>
           </td>
         `;
           tbody.appendChild(tr);
@@ -1852,185 +2394,184 @@ MODALS
       } catch (err) { showAlert(err.message); }
     });
 
-    /* Admin - Sites */
-    async function loadAdminSites() {
+    /* Admin Detailed Summary Reports Loader */
+    async function loadAdminReports() {
       try {
-        const sites = await api('/api/admin/sites');
-        const tbody = document.getElementById('admin-sites-body');
-        const siteSelect = document.getElementById('form-shift-site');
-        const schedSelect = document.getElementById('sched-site');
-        siteSelect.innerHTML = '<option value="">None</option>';
-        schedSelect.innerHTML = '<option value="">Select Site</option>';
-        tbody.innerHTML = '';
-        sites.forEach(s => {
-          siteSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-          schedSelect.innerHTML += `<option value="${s.id}">${s.name}</option>`;
-          const tr = document.createElement('tr');
-          tr.className = 'text-slate-300 border-b border-[var(--border-color)]';
-          tr.innerHTML = `
-          <td class="py-3.5 pr-3 font-semibold text-slate-100">${s.name}</td>
-          <td class="py-3.5">
-            <button class="text-indigo-400 hover:text-indigo-300 text-xs font-semibold mr-3" onclick="editSite(${s.id}, '${s.name.replace(/'/g, "\\'")}')">Edit</button>
-            <button class="text-red-400 hover:text-red-300 text-xs font-semibold" onclick="deleteSite(${s.id})">Delete</button>
-          </td>
-        `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) { showAlert(err.message); }
-    }
-
-    document.getElementById('btn-add-site').addEventListener('click', () => {
-      document.getElementById('modal-site-title').textContent = 'Add Site';
-      document.getElementById('form-site-id').value = '';
-      document.getElementById('form-site-name').value = '';
-      openModal('modal-site');
-    });
-
-    function editSite(id, name) {
-      document.getElementById('modal-site-title').textContent = 'Edit Site';
-      document.getElementById('form-site-id').value = id;
-      document.getElementById('form-site-name').value = name;
-      openModal('modal-site');
-    }
-    window.editSite = editSite;
-
-    async function deleteSite(id) {
-      if (!confirm('Delete this site?')) return;
-      try {
-        await api(`/api/admin/sites/${id}`, { method: 'DELETE' });
-        await loadAdminSites();
-      } catch (err) { showAlert(err.message); }
-    }
-    window.deleteSite = deleteSite;
-
-    document.getElementById('form-site').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const id = document.getElementById('form-site-id').value;
-      const name = document.getElementById('form-site-name').value;
-      try {
-        if (id) {
-          await api(`/api/admin/sites/${id}`, { method: 'PUT', body: JSON.stringify({ name }) });
-        } else {
-          await api('/api/admin/sites', { method: 'POST', body: JSON.stringify({ name }) });
+        const empId = document.getElementById('admin-report-employee').value;
+        let fromDate = document.getElementById('admin-report-from').value;
+        let toDate = document.getElementById('admin-report-to').value;
+        
+        if (!fromDate || !toDate) {
+          setDefaultReportDates('admin-report-from', 'admin-report-to');
+          fromDate = document.getElementById('admin-report-from').value;
+          toDate = document.getElementById('admin-report-to').value;
         }
-        closeModal('modal-site');
-        await loadAdminSites();
-      } catch (err) { showAlert(err.message); }
-    });
-
-    /* Admin - Schedules */
-    async function loadAdminSchedules() {
-      try {
-        const schedules = await api('/api/admin/schedules');
-        const tbody = document.getElementById('admin-schedules-body');
-        const empty = document.getElementById('admin-schedules-empty');
-        tbody.innerHTML = '';
-        if (schedules.length === 0) {
-          empty.classList.remove('hidden');
-          return;
+        
+        let url = `/api/admin/reports?date_from=${fromDate}&date_to=${toDate}`;
+        if (empId) {
+          url += `&employee_id=${empId}`;
         }
-        empty.classList.add('hidden');
-        schedules.forEach(s => {
-          const tr = document.createElement('tr');
-          tr.className = 'text-slate-300 border-b border-[var(--border-color)]';
-          tr.innerHTML = `
-          <td class="py-3.5 pr-3 font-semibold text-slate-100">${s.employee_name}</td>
-          <td class="py-3.5 pr-3">${s.site_name}</td>
-          <td class="py-3.5 pr-3">${s.date}</td>
-          <td class="py-3.5">
-            <button class="text-red-400 hover:text-red-300 text-xs font-semibold" onclick="deleteSchedule(${s.id})">Remove</button>
-          </td>
-        `;
-          tbody.appendChild(tr);
-        });
-      } catch (err) { showAlert(err.message); }
+        
+        const data = await api(url);
+        
+        document.getElementById('report-admin-total-hours').textContent = `${data.summary.total_hours.toFixed(2)} h`;
+        document.getElementById('report-admin-day-hours').textContent = `${data.summary.day_hours.toFixed(2)} h`;
+        document.getElementById('report-admin-night-hours').textContent = `${data.summary.night_hours.toFixed(2)} h`;
+        
+        state.adminReportShifts = data.shifts;
+        renderAdminReportsTable();
+      } catch (err) {
+        showAlert(err.message);
+      }
     }
 
-    document.getElementById('btn-add-schedule').addEventListener('click', async () => {
-      const empId = document.getElementById('sched-employee').value;
-      const siteId = document.getElementById('sched-site').value;
-      const date = document.getElementById('sched-date').value;
-      if (!empId || !siteId || !date) {
-        showAlert('Please select employee, site, and date.');
+    function renderAdminReportsTable() {
+      const tbody = document.getElementById('admin-report-body');
+      const empty = document.getElementById('admin-report-empty');
+      tbody.innerHTML = '';
+      
+      const shifts = [...(state.adminReportShifts || [])];
+      if (shifts.length === 0) {
+        empty.classList.remove('js-hidden');
         return;
       }
-      try {
-        await api('/api/admin/schedules', {
-          method: 'POST',
-          body: JSON.stringify({ employee_id: parseInt(empId), site_id: parseInt(siteId), date }),
-        });
-        document.getElementById('sched-employee').value = '';
-        document.getElementById('sched-site').value = '';
-        document.getElementById('sched-date').value = '';
-        await loadAdminSchedules();
-      } catch (err) { showAlert(err.message); }
-    });
-
-    async function deleteSchedule(id) {
-      if (!confirm('Remove this schedule assignment?')) return;
-      try {
-        await api(`/api/admin/schedules/${id}`, { method: 'DELETE' });
-        await loadAdminSchedules();
-      } catch (err) { showAlert(err.message); }
+      empty.classList.add('js-hidden');
+      
+      const sort = sortStates.adminReport;
+      sortData(shifts, sort.col, sort.order);
+      
+      shifts.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-50 border-b border-slate-100 transition print:border-slate-300';
+        tr.innerHTML = `
+          <td class="py-3.5 px-2 font-semibold text-slate-900 print:text-slate-955">${s.employee_name}</td>
+          <td class="py-3.5 px-2 text-slate-500 font-medium print:text-slate-900">${s.date}</td>
+          <td class="py-3.5 px-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-indigo-50 text-indigo-800 border border-indigo-100'} print:text-slate-900">
+              ${s.shift_type}
+            </span>
+          </td>
+          <td class="py-3.5 px-2 font-mono text-slate-600 print:text-slate-900">${s.clock_in}</td>
+          <td class="py-3.5 px-2 font-mono text-slate-600 print:text-slate-900">${s.clock_out || '—'}</td>
+          <td class="py-3.5 px-2 font-semibold text-slate-900 print:text-slate-955">${s.hours != null ? s.hours.toFixed(2) : '—'} h</td>
+        `;
+        tbody.appendChild(tr);
+      });
     }
-    window.deleteSchedule = deleteSchedule;
 
     /* ─── Logout ─── */
     function logout() {
       state.token = null;
       state.employeeId = null;
       state.isAdmin = false;
+      state.isDemoAdmin = false;
       state.employeeName = '';
       localStorage.removeItem('token');
       document.getElementById('login-password').value = '';
-      document.getElementById('login-error').classList.add('hidden');
+      document.getElementById('login-error').classList.add('js-hidden');
       userChangedTime = false;
       showView('login-view');
+      if (window.timerInterval) clearInterval(window.timerInterval);
     }
 
-    /* ─── Init on Load ─── */
+    /* ─── Page Initialization and Binding ─── */
     async function init() {
-      // Add change listeners for time inputs to stop auto-updating when user interacts
-      const elementsToWatch = [
-        'shift-date', 'shift-ci-date', 'shift-ci-hour', 'shift-ci-minute', 'shift-ci-period',
-        'shift-co-date', 'shift-co-hour', 'shift-co-minute', 'shift-co-period', 'shift-site'
-      ];
-      const markChanged = () => { userChangedTime = true; };
-      elementsToWatch.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.addEventListener('change', markChanged);
-      });
+      // Add auto-detection listeners to log shift forms
+      const empHour = document.getElementById('form-shift-ci-hour');
+      const empPer = document.getElementById('form-shift-ci-period');
+      if (empHour && empPer) {
+        const updateEmpType = () => autoDetectShiftType('form-shift-ci-hour', 'form-shift-ci-period', 'form-shift-type');
+        empHour.addEventListener('change', updateEmpType);
+        empPer.addEventListener('change', updateEmpType);
+      }
 
-      // Auto-update clock inputs every 30 seconds if the user hasn't changed them
-      setInterval(() => {
-        const view = document.getElementById('employee-view');
-        if (view && !view.classList.contains('hidden') && !userChangedTime) {
-          setDefaultTime();
-          setDefaultDate();
-        }
-      }, 30000);
-
-      // Bind admin tab buttons globally
-      document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+      // Bind tabs routing
+      document.querySelectorAll('.employee-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
-          const tab = btn.dataset.tab;
-          switchAdminTab(tab);
+          if (!btn.disabled) switchEmployeeTab(btn.dataset.tab);
         });
       });
 
-      // Bind all logout buttons
+      document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          switchAdminTab(btn.dataset.tab);
+        });
+      });
+
+      // Bind sortable column triggers to headers
+      const bindSort = (headerId, tableId, col) => {
+        const el = document.getElementById(headerId);
+        if (el) {
+          el.classList.add('cursor-pointer', 'select-none', 'hover:text-indigo-600', 'transition');
+          el.addEventListener('click', () => toggleSort(tableId, col));
+        }
+      };
+
+      bindSort('th-emp-date', 'empShifts', 'date');
+      bindSort('th-emp-hours', 'empShifts', 'hours');
+      
+      bindSort('th-emp-rep-date', 'empReport', 'date');
+      bindSort('th-emp-rep-type', 'empReport', 'shift_type');
+      bindSort('th-emp-rep-ci', 'empReport', 'clock_in');
+      bindSort('th-emp-rep-co', 'empReport', 'clock_out');
+      bindSort('th-emp-rep-hours', 'empReport', 'hours');
+
+      bindSort('th-adm-dir-name', 'adminDirectory', 'name');
+      bindSort('th-adm-dir-dept', 'adminDirectory', 'dept');
+      bindSort('th-adm-dir-week', 'adminDirectory', 'weekly_hours');
+      bindSort('th-adm-dir-month', 'adminDirectory', 'monthly_hours');
+      bindSort('th-adm-dir-days', 'adminDirectory', 'days_worked');
+
+      bindSort('th-adm-sh-name', 'adminShifts', 'employee_name');
+      bindSort('th-adm-sh-date', 'adminShifts', 'date');
+      bindSort('th-adm-sh-type', 'adminShifts', 'shift_type');
+      bindSort('th-adm-sh-hours', 'adminShifts', 'hours');
+
+      bindSort('th-adm-rep-name', 'adminReport', 'employee_name');
+      bindSort('th-adm-rep-date', 'adminReport', 'date');
+      bindSort('th-adm-rep-type', 'adminReport', 'shift_type');
+      bindSort('th-adm-rep-hours', 'adminReport', 'hours');
+
+      // Bind filter handlers
+      const empFilterBtn = document.getElementById('btn-emp-filter-reports');
+      if (empFilterBtn) {
+        empFilterBtn.addEventListener('click', loadEmployeeReports);
+      }
+
+      const adminFilterBtn = document.getElementById('btn-admin-filter-reports');
+      if (adminFilterBtn) {
+        adminFilterBtn.addEventListener('click', loadAdminReports);
+      }
+
+      // Bind print function
+      const adminPrintBtn = document.getElementById('btn-admin-print-reports');
+      if (adminPrintBtn) {
+        adminPrintBtn.addEventListener('click', () => {
+          const now = new Date();
+          document.getElementById('print-date').textContent = now.toLocaleString();
+          window.print();
+        });
+      }
+
+      // Logout triggers
       const logoutBtnIds = ['emp-logout', 'emp-logout-mobile', 'admin-logout', 'admin-logout-mobile'];
       logoutBtnIds.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('click', logout);
       });
 
+      // Session auto-check
       if (state.token) {
         try {
           const me = await api('/api/employee/me');
           state.employeeId = me.id;
           state.isAdmin = me.is_admin;
           state.employeeName = me.name;
+          
+          // Show role switcher containers
+          document.getElementById('switcher-container-emp').classList.remove('js-hidden');
+          document.getElementById('switcher-container-adm').classList.remove('js-hidden');
+
           if (me.is_admin) {
             await initAdmin();
           } else {
@@ -2051,7 +2592,6 @@ MODALS
       init();
     }
 
-    /* Populate time selects with current time on load */
     setDefaultTime();
     setDefaultDate();
   </script>

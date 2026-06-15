@@ -12,29 +12,13 @@ class Employee(Base):
     active = Column(Boolean, default=True)
 
 
-class Site(Base):
-    __tablename__ = "sites"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False, unique=True)
-    active = Column(Boolean, default=True)
-
-
 class Shift(Base):
     __tablename__ = "shifts"
 
     id = Column(Integer, primary_key=True, index=True)
     employee_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
-    site_id = Column(Integer, ForeignKey("sites.id"), nullable=True)
     clock_in = Column(DateTime, nullable=False)
     clock_out = Column(DateTime, nullable=True)
     date = Column(Date, nullable=False)
+    shift_type = Column(String, nullable=True) # "Day" or "Night"
 
-
-class Schedule(Base):
-    __tablename__ = "schedules"
-
-    id = Column(Integer, primary_key=True, index=True)
-    employee_id = Column(Integer, ForeignKey("employees.id"), nullable=False)
-    site_id = Column(Integer, ForeignKey("sites.id"), nullable=False)
-    date = Column(Date, nullable=False)

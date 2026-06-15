@@ -10,11 +10,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.database import get_db, Base, engine
-from app.models import Employee, Site, Shift, Schedule
+from app.models import Employee, Shift
 from app.schemas import (
     LoginRequest, ClockActionRequest,
-    EmployeeCreate, EmployeeUpdate, SiteCreate, SiteUpdate,
-    ShiftCreate, ShiftUpdate, ScheduleCreate, EmployeeShiftCreate,
+    EmployeeCreate, EmployeeUpdate,
+    ShiftCreate, ShiftUpdate, EmployeeShiftCreate,
 )
 from app.auth import (
     verify_password, hash_password, create_access_token, get_current_user,
@@ -61,6 +61,23 @@ def parse_12hour_time(time_str: str, date_obj: date) -> datetime:
 
 def format_12hour(dt: datetime) -> str:
     return dt.strftime("%I:%M %p").lstrip("0")
+
+
+def get_shift_type(dt: datetime) -> str:
+    # Day shift is starting between 6:00 AM (inclusive) and 6:00 PM (exclusive)
+    hour = dt.hour
+    if 6 <= hour < 18:
+        return "Day"
+    return "Night"
+
+
+def calculate_shift_hours(clock_in: datetime, clock_out: Optional[datetime]) -> Optional[float]:
+    if not clock_out:
+        return None
+    diff_hours = (clock_out - clock_in).total_seconds() / 3600
+    import math
+    return math.floor(diff_hours * 2 + 0.5) / 2
+
 
 
 def require_admin(current_user=Depends(get_current_user)):
@@ -110,25 +127,10 @@ def employee_me(current_user=Depends(get_current_user), db: Session = Depends(ge
     if not emp:
         raise HTTPException(status_code=404, detail="Employee not found")
 
-    today = date.today()
-    schedule = db.query(Schedule).filter(
-        Schedule.employee_id == emp.id,
-        Schedule.date == today
-    ).first()
-    site_name = None
-    site_id = None
-    if schedule:
-        site = db.query(Site).filter(Site.id == schedule.site_id).first()
-        if site:
-            site_name = site.name
-            site_id = site.id
-
     return {
         "id": emp.id,
         "name": emp.name,
         "is_admin": emp.is_admin,
-        "today_site": site_name,
-        "today_site_id": site_id,
     }
 
 
@@ -140,19 +142,13 @@ def active_shift(current_user=Depends(get_current_user), db: Session = Depends(g
     ).first()
     if not shift:
         return {"active": False}
-    site_name = None
-    if shift.site_id:
-        site = db.query(Site).filter(Site.id == shift.site_id).first()
-        if site:
-            site_name = site.name
     return {
         "active": True,
         "shift_id": shift.id,
         "clock_in": format_12hour(shift.clock_in),
         "clock_in_datetime": shift.clock_in.isoformat(),
-        "site": site_name,
-        "site_id": shift.site_id,
         "date": shift.date.isoformat(),
+        "shift_type": shift.shift_type or get_shift_type(shift.clock_in),
     }
 
 
@@ -175,17 +171,11 @@ def clock_in(
     if existing:
         raise HTTPException(status_code=400, detail="Already have an active shift")
 
-    emp = db.query(Employee).filter(Employee.id == current_user["employee_id"]).first()
-    schedule = db.query(Schedule).filter(
-        Schedule.employee_id == emp.id,
-        Schedule.date == d
-    ).first()
-
     shift = Shift(
         employee_id=current_user["employee_id"],
-        site_id=schedule.site_id if schedule else None,
         clock_in=clock_in_dt,
         date=d,
+        shift_type=get_shift_type(clock_in_dt),
     )
     db.add(shift)
     db.commit()
@@ -195,6 +185,7 @@ def clock_in(
         "id": shift.id,
         "clock_in": format_12hour(shift.clock_in),
         "date": shift.date.isoformat(),
+        "shift_type": shift.shift_type,
         "message": "Shift started successfully",
     }
 
@@ -226,14 +217,15 @@ def clock_out(
     db.commit()
     db.refresh(shift)
 
-    hours = (shift.clock_out - shift.clock_in).total_seconds() / 3600
+    hours = calculate_shift_hours(shift.clock_in, shift.clock_out)
 
     return {
         "id": shift.id,
         "clock_in": format_12hour(shift.clock_in),
         "clock_out": format_12hour(shift.clock_out),
         "date": shift.date.isoformat(),
-        "hours": round(hours, 2),
+        "hours": hours,
+        "shift_type": shift.shift_type,
         "message": "Shift ended successfully",
     }
 
@@ -258,8 +250,8 @@ def employee_weekly_hours(current_user=Depends(get_current_user), db: Session = 
         total = 0.0
         for s in shifts:
             if s.date == day_date:
-                total += (s.clock_out - s.clock_in).total_seconds() / 3600
-        result[day_name] = round(total, 2)
+                total += calculate_shift_hours(s.clock_in, s.clock_out) or 0.0
+        result[day_name] = total
 
     return result
 
@@ -285,11 +277,11 @@ def employee_monthly_hours(current_user=Depends(get_current_user), db: Session =
         week_num = (s.date.day - 1) // 7 + 1
         if week_num not in hours_by_week:
             hours_by_week[week_num] = 0.0
-        hours_by_week[week_num] += (s.clock_out - s.clock_in).total_seconds() / 3600
+        hours_by_week[week_num] += calculate_shift_hours(s.clock_in, s.clock_out) or 0.0
 
     result = []
     for w in range(1, 6):
-        result.append(round(hours_by_week.get(w, 0.0), 2))
+        result.append(hours_by_week.get(w, 0.0))
 
     return {"labels": ["Week 1", "Week 2", "Week 3", "Week 4", "Week 5"], "data": result}
 
@@ -309,29 +301,16 @@ def employee_shifts(
     )
     result = []
     for s in shifts:
-        hours = None
-        if s.clock_out:
-            hours = round((s.clock_out - s.clock_in).total_seconds() / 3600, 2)
-        site_name = None
-        if s.site_id:
-            site = db.query(Site).filter(Site.id == s.site_id).first()
-            if site:
-                site_name = site.name
+        hours = calculate_shift_hours(s.clock_in, s.clock_out)
         result.append({
             "id": s.id,
             "date": s.date.isoformat(),
             "clock_in": format_12hour(s.clock_in),
             "clock_out": format_12hour(s.clock_out) if s.clock_out else None,
             "hours": hours,
-            "site": site_name,
+            "shift_type": s.shift_type or get_shift_type(s.clock_in),
         })
     return result
-
-
-@app.get("/api/employee/sites")
-def employee_sites(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
-    sites = db.query(Site).filter(Site.active == True).order_by(Site.name).all()
-    return [{"id": s.id, "name": s.name} for s in sites]
 
 
 @app.post("/api/employee/shifts")
@@ -364,18 +343,19 @@ def employee_create_shift(
 
     if active_shift:
         if co_dt:
-            active_shift.site_id = req.site_id
             active_shift.clock_in = ci_dt
             active_shift.clock_out = co_dt
             active_shift.date = ci_date
+            active_shift.shift_type = req.shift_type or get_shift_type(ci_dt)
             db.commit()
             db.refresh(active_shift)
-            hours = round((co_dt - ci_dt).total_seconds() / 3600, 2)
+            hours = calculate_shift_hours(ci_dt, co_dt)
             return {
                 "id": active_shift.id,
                 "clock_in": format_12hour(active_shift.clock_in),
                 "clock_out": format_12hour(active_shift.clock_out),
                 "hours": hours,
+                "shift_type": active_shift.shift_type,
                 "message": "Active shift updated and completed",
             }
         else:
@@ -384,25 +364,74 @@ def employee_create_shift(
     # Create new shift
     shift = Shift(
         employee_id=current_user["employee_id"],
-        site_id=req.site_id,
         clock_in=ci_dt,
         clock_out=co_dt,
         date=ci_date,
+        shift_type=req.shift_type or get_shift_type(ci_dt),
     )
     db.add(shift)
     db.commit()
     db.refresh(shift)
 
-    hours = None
-    if co_dt:
-        hours = round((co_dt - ci_dt).total_seconds() / 3600, 2)
+    hours = calculate_shift_hours(ci_dt, co_dt)
 
     return {
         "id": shift.id,
         "clock_in": format_12hour(shift.clock_in),
         "clock_out": format_12hour(shift.clock_out) if shift.clock_out else None,
         "hours": hours,
+        "shift_type": shift.shift_type,
         "message": "Shift logged successfully",
+    }
+
+
+@app.get("/api/employee/reports")
+def employee_reports(
+    date_from: Optional[str] = Query(None),
+    date_to: Optional[str] = Query(None),
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    q = db.query(Shift).filter(Shift.employee_id == current_user["employee_id"])
+    if date_from:
+        q = q.filter(Shift.date >= date.fromisoformat(date_from))
+    if date_to:
+        q = q.filter(Shift.date <= date.fromisoformat(date_to))
+
+    shifts = q.order_by(Shift.date.desc(), Shift.clock_in.desc()).all()
+
+    total_hours = 0.0
+    day_hours = 0.0
+    night_hours = 0.0
+
+    detailed_shifts = []
+    for s in shifts:
+        hours = 0.0
+        if s.clock_out:
+            hours = calculate_shift_hours(s.clock_in, s.clock_out) or 0.0
+            total_hours += hours
+            if s.shift_type == "Day":
+                day_hours += hours
+            else:
+                night_hours += hours
+
+        detailed_shifts.append({
+            "id": s.id,
+            "date": s.date.isoformat(),
+            "clock_in": format_12hour(s.clock_in),
+            "clock_out": format_12hour(s.clock_out) if s.clock_out else None,
+            "hours": hours if s.clock_out else None,
+            "shift_type": s.shift_type or get_shift_type(s.clock_in),
+        })
+
+    return {
+        "shifts": detailed_shifts,
+        "summary": {
+            "total_hours": round(total_hours, 2),
+            "day_hours": round(day_hours, 2),
+            "night_hours": round(night_hours, 2),
+            "total_shifts": len(shifts),
+        }
     }
 
 
@@ -435,17 +464,17 @@ def admin_dashboard(current_user=Depends(require_admin), db: Session = Depends(g
             Shift.date >= monday, Shift.date <= monday + timedelta(days=6)
         ).all()
         w_total = sum(
-            (s.clock_out - s.clock_in).total_seconds() / 3600 for s in w_shifts
+            calculate_shift_hours(s.clock_in, s.clock_out) or 0.0 for s in w_shifts
         )
-        weekly_data[emp.name] = round(w_total, 2)
+        weekly_data[emp.name] = w_total
 
         m_shifts = emp_shifts.filter(
             Shift.date >= first_day, Shift.date <= last_day
         ).all()
         m_total = sum(
-            (s.clock_out - s.clock_in).total_seconds() / 3600 for s in m_shifts
+            calculate_shift_hours(s.clock_in, s.clock_out) or 0.0 for s in m_shifts
         )
-        monthly_data[emp.name] = round(m_total, 2)
+        monthly_data[emp.name] = m_total
 
     active_count = (
         db.query(Shift)
@@ -459,6 +488,93 @@ def admin_dashboard(current_user=Depends(require_admin), db: Session = Depends(g
         "active_shifts": active_count,
         "total_employees": len(employees),
     }
+
+
+@app.get("/api/admin/directory")
+def admin_directory(current_user=Depends(require_admin), db: Session = Depends(get_db)):
+    today = date.today()
+    monday = today - timedelta(days=today.weekday())
+    first_day = today.replace(day=1)
+    if today.month == 12:
+        last_day = today.replace(day=31)
+    else:
+        last_day = (today.replace(month=today.month + 1, day=1) - timedelta(days=1))
+
+    employees = db.query(Employee).filter(
+        Employee.active == True, Employee.is_admin == False
+    ).all()
+
+    result = []
+    for emp in employees:
+        completed = db.query(Shift).filter(
+            Shift.employee_id == emp.id,
+            Shift.clock_out.isnot(None),
+        )
+
+        w_shifts = completed.filter(
+            Shift.date >= monday, Shift.date <= monday + timedelta(days=6)
+        ).all()
+        w_total = sum(
+            calculate_shift_hours(s.clock_in, s.clock_out) or 0.0 for s in w_shifts
+        )
+
+        m_shifts = completed.filter(
+            Shift.date >= first_day, Shift.date <= last_day
+        ).all()
+        m_total = sum(
+            calculate_shift_hours(s.clock_in, s.clock_out) or 0.0 for s in m_shifts
+        )
+        days_worked = len(set(s.date for s in m_shifts))
+
+        active_now = db.query(Shift).filter(
+            Shift.employee_id == emp.id,
+            Shift.clock_out.is_(None),
+        ).first() is not None
+
+        result.append({
+            "id": emp.id,
+            "name": emp.name,
+            "weekly_hours": round(w_total, 2),
+            "monthly_hours": round(m_total, 2),
+            "days_worked": days_worked,
+            "active_now": active_now,
+        })
+
+    return result
+
+
+@app.get("/api/admin/hours/monthly-history")
+def admin_monthly_history(current_user=Depends(require_admin), db: Session = Depends(get_db)):
+    today = date.today()
+    months = []
+    for i in range(5, -1, -1):
+        m = today.month - i
+        y = today.year
+        while m < 1:
+            m += 12
+            y -= 1
+        while m > 12:
+            m -= 12
+            y += 1
+        first = date(y, m, 1)
+        if m == 12:
+            last = date(y, 12, 31)
+        else:
+            last = date(y, m + 1, 1) - timedelta(days=1)
+
+        shifts = db.query(Shift).filter(
+            Shift.clock_out.isnot(None),
+            Shift.date >= first,
+            Shift.date <= last,
+        ).all()
+
+        total = sum(calculate_shift_hours(s.clock_in, s.clock_out) or 0.0 for s in shifts)
+
+        months.append({
+            "month": first.strftime("%b"),
+            "hours": total,
+        })
+    return months
 
 
 # ─── Admin: Employees ───
@@ -537,59 +653,7 @@ def admin_delete_employee(
     return {"message": "Employee deleted"}
 
 
-# ─── Admin: Sites ───
-
-@app.get("/api/admin/sites")
-def admin_sites(current_user=Depends(require_admin), db: Session = Depends(get_db)):
-    sites = db.query(Site).order_by(Site.id).all()
-    return [
-        {"id": s.id, "name": s.name, "active": s.active} for s in sites
-    ]
-
-
-@app.post("/api/admin/sites")
-def admin_create_site(
-    req: SiteCreate,
-    current_user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
-    existing = db.query(Site).filter(Site.name == req.name).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Site already exists")
-    site = Site(name=req.name, active=True)
-    db.add(site)
-    db.commit()
-    db.refresh(site)
-    return {"id": site.id, "name": site.name, "message": "Site created"}
-
-
-@app.put("/api/admin/sites/{site_id}")
-def admin_update_site(
-    site_id: int,
-    req: SiteUpdate,
-    current_user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
-    site = db.query(Site).filter(Site.id == site_id).first()
-    if not site:
-        raise HTTPException(status_code=404, detail="Site not found")
-    site.name = req.name
-    db.commit()
-    return {"id": site.id, "name": site.name, "message": "Site updated"}
-
-
-@app.delete("/api/admin/sites/{site_id}")
-def admin_delete_site(
-    site_id: int,
-    current_user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
-    site = db.query(Site).filter(Site.id == site_id).first()
-    if not site:
-        raise HTTPException(status_code=404, detail="Site not found")
-    db.delete(site)
-    db.commit()
-    return {"message": "Site deleted"}
+# Sites functionality removed
 
 
 # ─── Admin: Shifts ───
@@ -613,24 +677,17 @@ def admin_shifts(
 
     result = []
     for s in shifts:
-        hours = None
-        if s.clock_out:
-            hours = round((s.clock_out - s.clock_in).total_seconds() / 3600, 2)
+        hours = calculate_shift_hours(s.clock_in, s.clock_out)
         emp = db.query(Employee).filter(Employee.id == s.employee_id).first()
-        site_name = None
-        if s.site_id:
-            site = db.query(Site).filter(Site.id == s.site_id).first()
-            if site:
-                site_name = site.name
         result.append({
             "id": s.id,
             "employee_id": s.employee_id,
             "employee_name": emp.name if emp else "Unknown",
-            "site": site_name,
             "date": s.date.isoformat(),
             "clock_in": format_12hour(s.clock_in),
             "clock_out": format_12hour(s.clock_out) if s.clock_out else None,
             "hours": hours,
+            "shift_type": s.shift_type or get_shift_type(s.clock_in),
         })
     return result
 
@@ -659,24 +716,23 @@ def admin_create_shift(
 
     shift = Shift(
         employee_id=req.employee_id,
-        site_id=req.site_id,
         clock_in=ci_dt,
         clock_out=co_dt,
         date=ci_date,
+        shift_type=req.shift_type or get_shift_type(ci_dt),
     )
     db.add(shift)
     db.commit()
     db.refresh(shift)
 
-    hours = None
-    if co_dt:
-        hours = round((co_dt - ci_dt).total_seconds() / 3600, 2)
+    hours = calculate_shift_hours(ci_dt, co_dt)
 
     return {
         "id": shift.id,
         "clock_in": format_12hour(shift.clock_in),
         "clock_out": format_12hour(shift.clock_out) if shift.clock_out else None,
         "hours": hours,
+        "shift_type": shift.shift_type,
         "message": "Shift created",
     }
 
@@ -719,20 +775,76 @@ def admin_update_shift(
     shift.clock_in = temp_ci
     shift.clock_out = temp_co
     shift.date = temp_date
+    shift.shift_type = req.shift_type or get_shift_type(temp_ci)
 
     db.commit()
     db.refresh(shift)
 
-    hours = None
-    if shift.clock_out:
-        hours = round((shift.clock_out - shift.clock_in).total_seconds() / 3600, 2)
+    hours = calculate_shift_hours(temp_ci, temp_co)
 
     return {
         "id": shift.id,
         "clock_in": format_12hour(shift.clock_in),
         "clock_out": format_12hour(shift.clock_out) if shift.clock_out else None,
         "hours": hours,
+        "shift_type": shift.shift_type,
         "message": "Shift updated",
+    }
+
+
+@app.get("/api/admin/reports")
+def admin_reports(
+    employee_id: Optional[int] = Query(None),
+    date_from: Optional[str] = Query(None),
+    date_to: Optional[str] = Query(None),
+    current_user=Depends(require_admin),
+    db: Session = Depends(get_db),
+):
+    q = db.query(Shift).join(Employee, Shift.employee_id == Employee.id)
+    if employee_id:
+        q = q.filter(Shift.employee_id == employee_id)
+    if date_from:
+        q = q.filter(Shift.date >= date.fromisoformat(date_from))
+    if date_to:
+        q = q.filter(Shift.date <= date.fromisoformat(date_to))
+
+    shifts = q.order_by(Shift.date.desc(), Shift.clock_in.desc()).all()
+
+    total_hours = 0.0
+    day_hours = 0.0
+    night_hours = 0.0
+
+    detailed_shifts = []
+    for s in shifts:
+        hours = 0.0
+        if s.clock_out:
+            hours = calculate_shift_hours(s.clock_in, s.clock_out) or 0.0
+            total_hours += hours
+            if s.shift_type == "Day":
+                day_hours += hours
+            else:
+                night_hours += hours
+
+        emp = db.query(Employee).filter(Employee.id == s.employee_id).first()
+        detailed_shifts.append({
+            "id": s.id,
+            "employee_id": s.employee_id,
+            "employee_name": emp.name if emp else "Unknown",
+            "date": s.date.isoformat(),
+            "clock_in": format_12hour(s.clock_in),
+            "clock_out": format_12hour(s.clock_out) if s.clock_out else None,
+            "hours": hours if s.clock_out else None,
+            "shift_type": s.shift_type or get_shift_type(s.clock_in),
+        })
+
+    return {
+        "shifts": detailed_shifts,
+        "summary": {
+            "total_hours": round(total_hours, 2),
+            "day_hours": round(day_hours, 2),
+            "night_hours": round(night_hours, 2),
+            "total_shifts": len(shifts),
+        }
     }
 
 
@@ -748,76 +860,3 @@ def admin_delete_shift(
     db.delete(shift)
     db.commit()
     return {"message": "Shift deleted"}
-
-
-# ─── Admin: Schedules ───
-
-@app.get("/api/admin/schedules")
-def admin_schedules(
-    date_str: Optional[str] = Query(None),
-    current_user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
-    q = db.query(Schedule)
-    if date_str:
-        q = q.filter(Schedule.date == date.fromisoformat(date_str))
-    schedules = q.order_by(Schedule.date).all()
-
-    result = []
-    for s in schedules:
-        emp = db.query(Employee).filter(Employee.id == s.employee_id).first()
-        site = db.query(Site).filter(Site.id == s.site_id).first()
-        result.append({
-            "id": s.id,
-            "employee_id": s.employee_id,
-            "employee_name": emp.name if emp else "Unknown",
-            "site_id": s.site_id,
-            "site_name": site.name if site else "Unknown",
-            "date": s.date.isoformat(),
-        })
-    return result
-
-
-@app.post("/api/admin/schedules")
-def admin_create_schedule(
-    req: ScheduleCreate,
-    current_user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
-    try:
-        sched_date = date.fromisoformat(req.date)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid date format")
-
-    existing = db.query(Schedule).filter(
-        Schedule.employee_id == req.employee_id,
-        Schedule.date == sched_date,
-    ).first()
-    if existing:
-        existing.site_id = req.site_id
-        db.commit()
-        return {"id": existing.id, "message": "Schedule updated"}
-
-    sched = Schedule(
-        employee_id=req.employee_id,
-        site_id=req.site_id,
-        date=sched_date,
-    )
-    db.add(sched)
-    db.commit()
-    db.refresh(sched)
-    return {"id": sched.id, "message": "Schedule created"}
-
-
-@app.delete("/api/admin/schedules/{schedule_id}")
-def admin_delete_schedule(
-    schedule_id: int,
-    current_user=Depends(require_admin),
-    db: Session = Depends(get_db),
-):
-    sched = db.query(Schedule).filter(Schedule.id == schedule_id).first()
-    if not sched:
-        raise HTTPException(status_code=404, detail="Schedule not found")
-    db.delete(sched)
-    db.commit()
-    return {"message": "Schedule deleted"}
