@@ -1,12 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Team Work Hours Dashboard</title>
+  <title>Timesheet & Analytics Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *,
     *::before,
@@ -15,8 +16,8 @@
     }
 
     body {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-      background: #F4C430;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #f8fafc;
       color: #1e293b;
     }
 
@@ -45,7 +46,7 @@
     }
 
     .btn-primary {
-      background-color: #6B46C1;
+      background-color: #4f46e5;
       color: #ffffff;
       padding: 0.5rem 1rem;
       border-radius: 0.5rem;
@@ -58,7 +59,7 @@
     }
 
     .btn-primary:hover {
-      background-color: #5B3FB5;
+      background-color: #4338ca;
       box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.15), 0 4px 6px -2px rgba(79, 70, 229, 0.05);
     }
 
@@ -79,7 +80,7 @@
     }
 
     .sidebar-btn.active {
-      color: #6B46C1;
+      color: #4f46e5;
       background-color: #e0e7ff;
       font-weight: 600;
     }
@@ -148,7 +149,7 @@
     }
 
     .sidebar-btn.active {
-      color: #6B46C1;
+      color: #4f46e5;
       background-color: #e0e7ff;
       font-weight: 600;
     }
@@ -182,54 +183,54 @@
   </style>
 </head>
 
-<body class="antialiased min-h-screen flex flex-col" style="background:#F4C430;">
+<body class="antialiased min-h-screen flex flex-col bg-slate-50">
 
-  <!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  <!-- ════════════════════════════════════════════════════════════
   LOGIN VIEW
-  ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
-  <div id="login-view" class="min-h-screen flex items-center justify-center p-4">
+  ════════════════════════════════════════════════════════════ -->
+  <div id="login-view" class="min-h-screen flex items-center justify-center p-4 bg-slate-100">
     <div class="w-full max-w-md bg-white border border-slate-200 rounded-2xl shadow-xl p-8 fade-in text-slate-800">
       <div class="text-center mb-8">
-        <div class="w-16 h-16 bg-purple-50 border border-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-purple-600 shadow-sm">
+        <div class="w-16 h-16 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-indigo-600 shadow-sm">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Team Work Hours Dashboard</h1>
+        <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Timesheet Analytics</h1>
         <p class="text-slate-500 text-sm mt-1">Enter your passcode to sign in to your workspace</p>
       </div>
       <form id="login-form">
         <div class="mb-6">
           <label for="login-password" class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Passcode</label>
-          <input id="login-password" type="password" placeholder="ΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇóΓÇó" required
+          <input id="login-password" type="password" placeholder="••••••••" required
             autocomplete="current-password"
-            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition shadow-sm" />
+            class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition shadow-sm" />
         </div>
         <p id="login-error" class="text-rose-600 text-sm mb-4 hidden font-medium"></p>
         <button type="submit"
-          class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition text-base shadow-lg shadow-purple-600/10 hover:shadow-purple-600/20">
+          class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-base shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20">
           Sign In
         </button>
       </form>
     </div>
   </div>
 
-  <!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  <!-- ════════════════════════════════════════════════════════════
   EMPLOYEE VIEW
-  ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
-  <div id="employee-view" class="min-h-screen flex text-slate-800 w-full" style="background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.08);overflow:hidden;max-width:1400px;margin:40px auto;">
+  ════════════════════════════════════════════════════════════ -->
+  <div id="employee-view" class="min-h-screen flex text-slate-800 w-full">
     <!-- Left Sidebar -->
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-5 sticky top-0 h-screen shrink-0 max-md:hidden flex">
       <div class="space-y-6">
         <!-- Logo -->
         <div class="flex items-center gap-3 px-2">
-          <div class="w-10 h-10 bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-center text-purple-600 shadow-sm">
+          <div class="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <span class="font-bold text-lg text-slate-900 tracking-tight">Dashboard</span>
+          <span class="font-bold text-lg text-slate-900 tracking-tight">Timesheet</span>
         </div>
         <!-- Menu -->
         <nav class="space-y-1">
@@ -265,14 +266,14 @@
         <!-- Switcher -->
         <div id="switcher-container-emp" class="hidden pt-3 border-t border-slate-200">
           <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">View Role</label>
-          <select class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-purple-500 form-select font-semibold" onchange="switchViewMode(this.value)" id="role-switcher-emp">
+          <select class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 form-select font-semibold" onchange="switchViewMode(this.value)" id="role-switcher-emp">
             <option value="employee">Employee View</option>
             <option value="admin">Admin View</option>
           </select>
         </div>
 
         <div class="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
-          <div class="w-9 h-9 bg-purple-600 rounded-lg flex items-center justify-center font-bold text-white shrink-0" id="emp-avatar">
+          <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shrink-0" id="emp-avatar">
             E
           </div>
           <div class="truncate font-medium">
@@ -310,7 +311,7 @@
       <!-- Tabs -->
       <div class="border-b border-slate-200 bg-white">
         <nav class="flex overflow-x-auto px-4 py-2 gap-2 text-xs font-semibold scrollbar-none">
-          <button class="px-3 py-1.5 rounded-lg bg-purple-100 text-purple-700 shrink-0 employee-tab-btn" data-tab="dashboard">Dashboard</button>
+          <button class="px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 shrink-0 employee-tab-btn" data-tab="dashboard">Dashboard</button>
           <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 employee-tab-btn" data-tab="reports">My Timesheets</button>
           <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 employee-tab-btn" data-tab="team-analytics">Team Analytics</button>
           <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 employee-tab-btn" data-tab="settings">Settings</button>
@@ -319,7 +320,7 @@
 
       <!-- Content -->
       <main class="flex-1 p-6 space-y-6 overflow-y-auto">
-        <!-- ΓöÇΓöÇΓöÇ Dashboard Container ΓöÇΓöÇΓöÇ -->
+        <!-- ─── Dashboard Container ─── -->
         <div id="emp-tab-dashboard" class="space-y-6">
           
           <!-- KPI Row -->
@@ -335,21 +336,21 @@
                 <span class="text-xs text-slate-400">/ 160h</span>
               </div>
               <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                <div id="kpi-emp-month-progress" class="bg-purple-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                <div id="kpi-emp-month-progress" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
               </div>
             </div>
             <!-- Card 2 -->
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
               <div class="flex justify-between items-center text-slate-500">
                 <span class="text-xs font-semibold uppercase tracking-wider">This Week's Hours</span>
-                <span class="text-[10px] font-bold bg-purple-50 text-purple-700 px-1.5 py-0.5 rounded-full">+5%</span>
+                <span class="text-[10px] font-bold bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-full">+5%</span>
               </div>
               <div class="flex items-baseline gap-2">
                 <span id="kpi-emp-week-hours" class="text-2xl font-bold text-slate-900">0.00 hrs</span>
                 <span class="text-xs text-slate-400">/ 40h</span>
               </div>
               <div class="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
-                <div id="kpi-emp-week-progress" class="bg-purple-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                <div id="kpi-emp-week-progress" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-500" style="width: 0%"></div>
               </div>
             </div>
             <!-- Card 3 -->
@@ -424,12 +425,12 @@
               <table class="w-full text-sm">
                 <thead>
                   <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
-                    <th id="th-emp-date" class="pb-3 px-2">Date<span id="sort-empShifts-date"> Γû╝</span></th>
+                    <th id="th-emp-date" class="pb-3 px-2">Date<span id="sort-empShifts-date"> ▼</span></th>
                     <th class="pb-3 px-2">Project/Task</th>
                     <th class="pb-3 px-2">Check-in</th>
                     <th class="pb-3 px-2">Check-out</th>
                     <th class="pb-3 px-2">Break</th>
-                    <th id="th-emp-hours" class="pb-3 px-2">Net Hours<span id="sort-empShifts-hours"> Γåò</span></th>
+                    <th id="th-emp-hours" class="pb-3 px-2">Net Hours<span id="sort-empShifts-hours"> ↕</span></th>
                     <th class="pb-3 px-2">Status</th>
                   </tr>
                 </thead>
@@ -441,10 +442,10 @@
           </div>
         </div>
 
-        <!-- ΓöÇΓöÇΓöÇ My Timesheets (Reports) ΓöÇΓöÇΓöÇ -->
+        <!-- ─── My Timesheets (Reports) ─── -->
         <div id="emp-tab-reports" class="js-hidden space-y-6">
           <div class="flex justify-between items-center flex-wrap gap-4">
-            <h2 class="text-lg font-bold text-slate-900 uppercase tracking-wider">My Shift Reports</h2>
+            <h2 class="text-lg font-bold text-slate-900 uppercase tracking-wider">My Shift Timesheets</h2>
             <button id="btn-open-log-modal" class="btn-primary text-sm flex items-center gap-1.5">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
               Log Past Shift
@@ -454,11 +455,11 @@
           <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex flex-wrap items-end gap-4">
             <div class="flex flex-col">
               <label class="block text-xs font-semibold text-slate-500 mb-1">From Date</label>
-              <input type="date" id="emp-report-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+              <input type="date" id="emp-report-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
             </div>
             <div class="flex flex-col">
               <label class="block text-xs font-semibold text-slate-500 mb-1">To Date</label>
-              <input type="date" id="emp-report-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+              <input type="date" id="emp-report-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
             </div>
             <button id="btn-emp-filter-reports" class="btn-primary text-sm flex items-center gap-1">
               Filter
@@ -470,7 +471,7 @@
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-2.5">
               <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Hours</span>
               <div class="flex items-center justify-between">
-                <span id="report-emp-total-hours" class="text-2xl font-bold text-purple-600">0.00 h</span>
+                <span id="report-emp-total-hours" class="text-2xl font-bold text-indigo-600">0.00 h</span>
                 <span class="text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-2 py-0.5 rounded-md">Total Cumulative</span>
               </div>
             </div>
@@ -485,7 +486,7 @@
               <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Night Shift Hours</span>
               <div class="flex items-center justify-between">
                 <span id="report-emp-night-hours" class="text-2xl font-bold text-violet-600">0.00 h</span>
-                <span class="text-xs font-semibold text-purple-800 bg-purple-50 border border-purple-100 px-2 py-0.5 rounded-md">Night Shift</span>
+                <span class="text-xs font-semibold text-indigo-800 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">Night Shift</span>
               </div>
             </div>
           </div>
@@ -497,11 +498,11 @@
               <table class="w-full text-sm">
                 <thead>
                   <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
-                    <th id="th-emp-rep-date" class="pb-3 px-2">Date<span id="sort-empReport-date"> Γû╝</span></th>
-                    <th id="th-emp-rep-type" class="pb-3 px-2">Shift Type<span id="sort-empReport-shift_type"> Γåò</span></th>
-                    <th id="th-emp-rep-ci" class="pb-3 px-2">Clock-In (Started)<span id="sort-empReport-clock_in"> Γåò</span></th>
-                    <th id="th-emp-rep-co" class="pb-3 px-2">Clock-Out (Finished)<span id="sort-empReport-clock_out"> Γåò</span></th>
-                    <th id="th-emp-rep-hours" class="pb-3 px-2">Total Hours<span id="sort-empReport-hours"> Γåò</span></th>
+                    <th id="th-emp-rep-date" class="pb-3 px-2">Date<span id="sort-empReport-date"> ▼</span></th>
+                    <th id="th-emp-rep-type" class="pb-3 px-2">Shift Type<span id="sort-empReport-shift_type"> ↕</span></th>
+                    <th id="th-emp-rep-ci" class="pb-3 px-2">Clock-In (Started)<span id="sort-empReport-clock_in"> ↕</span></th>
+                    <th id="th-emp-rep-co" class="pb-3 px-2">Clock-Out (Finished)<span id="sort-empReport-clock_out"> ↕</span></th>
+                    <th id="th-emp-rep-hours" class="pb-3 px-2">Total Hours<span id="sort-empReport-hours"> ↕</span></th>
                   </tr>
                 </thead>
                 <tbody id="emp-report-body" class="divide-y divide-slate-100 text-slate-700">
@@ -512,10 +513,10 @@
           </div>
         </div>
 
-        <!-- ΓöÇΓöÇΓöÇ Team Analytics Restricted View ΓöÇΓöÇΓöÇ -->
+        <!-- ─── Team Analytics Restricted View ─── -->
         <div id="emp-tab-analytics" class="js-hidden space-y-6">
           <div class="bg-white border border-slate-200 rounded-xl p-8 shadow-sm max-w-xl mx-auto text-center space-y-4 my-12">
-            <div class="w-16 h-16 bg-purple-50 border border-purple-100 rounded-2xl flex items-center justify-center mx-auto text-purple-600 shadow-sm">
+            <div class="w-16 h-16 bg-indigo-50 border border-indigo-100 rounded-2xl flex items-center justify-center mx-auto text-indigo-600 shadow-sm">
               <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
@@ -524,14 +525,14 @@
             <p class="text-slate-600 text-sm max-w-md mx-auto">
               This panel contains company-wide timesheet summaries, headcount metrics, and pending approvals.
             </p>
-            <div class="bg-purple-50 border border-purple-100 rounded-xl p-4 text-xs text-purple-700 max-w-md mx-auto">
-              <p class="font-bold mb-1">≡ƒÆí Demonstration Tip</p>
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-xs text-indigo-700 max-w-md mx-auto">
+              <p class="font-bold mb-1">💡 Demonstration Tip</p>
               <p>Please use the **View Role** selector at the bottom of the sidebar to switch to **Admin View** to explore Team Analytics.</p>
             </div>
           </div>
         </div>
 
-        <!-- ΓöÇΓöÇΓöÇ Settings Tab ΓöÇΓöÇΓöÇ -->
+        <!-- ─── Settings Tab ─── -->
         <div id="emp-tab-settings" class="js-hidden space-y-6">
           <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-xl space-y-4">
             <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">My Settings</h3>
@@ -545,8 +546,8 @@
                 <p id="settings-emp-role" class="font-medium text-slate-800 bg-slate-50 px-3 py-2 rounded-lg border border-slate-100">Team Member</p>
               </div>
             </div>
-            <div class="bg-purple-50 border border-purple-100 rounded-xl p-4 text-xs text-purple-700 space-y-2">
-              <p class="font-bold">≡ƒöÆ Secure Session Passcode</p>
+            <div class="bg-indigo-50 border border-indigo-100 rounded-xl p-4 text-xs text-indigo-700 space-y-2">
+              <p class="font-bold">🔒 Secure Session Passcode</p>
               <p>Your session is protected via passcode. Please do not share your entry credentials with others.</p>
             </div>
           </div>
@@ -556,16 +557,16 @@
     </div>
   </div>
 
-  <!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  <!-- ════════════════════════════════════════════════════════════
   ADMIN VIEW
-  ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
-  <div id="admin-view" class="min-h-screen flex text-slate-800 w-full" style="background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,0.08);overflow:hidden;max-width:1400px;margin:40px auto;">
+  ════════════════════════════════════════════════════════════ -->
+  <div id="admin-view" class="min-h-screen flex text-slate-800 w-full">
     <!-- Left Sidebar -->
     <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between p-5 sticky top-0 h-screen shrink-0 max-md:hidden flex">
       <div class="space-y-6">
         <!-- Logo -->
         <div class="flex items-center gap-3 px-2">
-          <div class="w-10 h-10 bg-purple-50 border border-purple-100 rounded-xl flex items-center justify-center text-purple-600 shadow-sm">
+          <div class="w-10 h-10 bg-indigo-50 border border-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 shadow-sm">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
@@ -600,14 +601,14 @@
         <!-- Switcher -->
         <div id="switcher-container-adm" class="hidden pt-3 border-t border-slate-200">
           <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">View Role</label>
-          <select class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-purple-500 form-select font-semibold" onchange="switchViewMode(this.value)" id="role-switcher-adm">
+          <select class="w-full px-2 py-1.5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500 form-select font-semibold" onchange="switchViewMode(this.value)" id="role-switcher-adm">
             <option value="employee">Employee View</option>
             <option value="admin" selected>Admin View</option>
           </select>
         </div>
 
         <div class="flex items-center gap-3 p-2 bg-slate-50 border border-slate-200 rounded-xl">
-          <div class="w-9 h-9 bg-purple-600 rounded-lg flex items-center justify-center font-bold text-white shrink-0">
+          <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center font-bold text-white shrink-0">
             A
           </div>
           <div class="truncate font-medium">
@@ -641,7 +642,7 @@
       <!-- Tabs -->
       <div class="border-b border-slate-200 bg-white">
         <nav class="flex overflow-x-auto px-4 py-2 gap-2 text-xs font-semibold scrollbar-none">
-          <button class="px-3 py-1.5 rounded-lg bg-purple-100 text-purple-700 shrink-0 admin-tab-btn" data-tab="overview">Dashboard</button>
+          <button class="px-3 py-1.5 rounded-lg bg-indigo-100 text-indigo-700 shrink-0 admin-tab-btn" data-tab="overview">Dashboard</button>
           <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 admin-tab-btn" data-tab="reports">Team Analytics</button>
           <button class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-700 shrink-0 admin-tab-btn" data-tab="settings">Settings</button>
         </nav>
@@ -650,7 +651,7 @@
       <!-- Main Content -->
       <main class="flex-1 p-6 space-y-6 overflow-y-auto">
 
-        <!-- ΓöÇΓöÇΓöÇ Dashboard Overview Panel ΓöÇΓöÇΓöÇ -->
+        <!-- ─── Dashboard Overview Panel ─── -->
         <div id="tab-overview" class="tab-content space-y-6">
           
           <!-- KPI Stats Grid -->
@@ -659,7 +660,7 @@
               <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Team Hours (Week)</span>
               <div class="flex items-baseline justify-between">
                 <span id="stat-team-hours" class="text-2xl font-bold text-slate-900">0.00 h</span>
-                <span class="text-xs text-purple-600 font-medium">Weekly Total</span>
+                <span class="text-xs text-indigo-600 font-medium">Weekly Total</span>
               </div>
             </div>
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
@@ -687,7 +688,7 @@
 
           <!-- Team Monthly History Chart -->
           <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Team Hours ΓÇö Monthly Overview</h3>
+            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4">Team Hours — Monthly Overview</h3>
             <div class="chart-container">
               <canvas id="admin-monthly-chart"></canvas>
             </div>
@@ -699,8 +700,8 @@
               <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Employee Directory</h3>
               <div class="flex flex-wrap items-center gap-2">
                 <input type="text" id="dir-search" placeholder="Search employees..."
-                  class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 w-48 font-medium shadow-sm" />
-                <select id="dir-filter-dept" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 form-select font-medium shadow-sm">
+                  class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 font-medium shadow-sm" />
+                <select id="dir-filter-dept" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select font-medium shadow-sm">
                   <option value="">All Departments</option>
                   <option value="Engineering">Engineering</option>
                   <option value="Product">Product</option>
@@ -714,11 +715,11 @@
               <table class="w-full text-sm">
                 <thead>
                   <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
-                    <th id="th-adm-dir-name" class="pb-3 px-2">Employee<span id="sort-adminDirectory-name"> Γåò</span></th>
-                    <th id="th-adm-dir-dept" class="pb-3 px-2">Department<span id="sort-adminDirectory-dept"> Γåò</span></th>
-                    <th id="th-adm-dir-week" class="pb-3 px-2">Hours This Week<span id="sort-adminDirectory-weekly_hours"> Γåò</span></th>
-                    <th id="th-adm-dir-month" class="pb-3 px-2">Hours This Month<span id="sort-adminDirectory-monthly_hours"> Γåò</span></th>
-                    <th id="th-adm-dir-days" class="pb-3 px-2">Days Worked<span id="sort-adminDirectory-days_worked"> Γåò</span></th>
+                    <th id="th-adm-dir-name" class="pb-3 px-2">Employee<span id="sort-adminDirectory-name"> ↕</span></th>
+                    <th id="th-adm-dir-dept" class="pb-3 px-2">Department<span id="sort-adminDirectory-dept"> ↕</span></th>
+                    <th id="th-adm-dir-week" class="pb-3 px-2">Hours This Week<span id="sort-adminDirectory-weekly_hours"> ↕</span></th>
+                    <th id="th-adm-dir-month" class="pb-3 px-2">Hours This Month<span id="sort-adminDirectory-monthly_hours"> ↕</span></th>
+                    <th id="th-adm-dir-days" class="pb-3 px-2">Days Worked<span id="sort-adminDirectory-days_worked"> ↕</span></th>
                     <th class="pb-3 px-2">Status</th>
                     <th class="pb-3 px-2">Actions</th>
                   </tr>
@@ -731,12 +732,12 @@
           </div>
         </div>
 
-        <!-- ΓöÇΓöÇΓöÇ Team Analytics Tab (Reports + Shifts + Employees Sub-views) ΓöÇΓöÇΓöÇ -->
+        <!-- ─── Team Analytics Tab (Reports + Shifts + Employees Sub-views) ─── -->
         <div id="tab-reports" class="tab-content space-y-6">
           
           <!-- Sub-tabs navigation bar -->
           <div class="border-b border-slate-200 bg-white rounded-xl p-2 shadow-sm flex flex-wrap gap-2">
-            <button class="px-4 py-2 text-xs font-bold rounded-lg bg-purple-100 text-purple-700 sub-tab-btn" data-subtab="admin-reports-view">
+            <button class="px-4 py-2 text-xs font-bold rounded-lg bg-indigo-100 text-indigo-700 sub-tab-btn" data-subtab="admin-reports-view">
               Detailed Reports
             </button>
             <button class="px-4 py-2 text-xs font-bold rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-50 sub-tab-btn" data-subtab="admin-shifts-view">
@@ -754,17 +755,17 @@
               <div class="flex flex-col">
                 <label class="block text-xs font-semibold text-slate-500 mb-1">Employee</label>
                 <select id="admin-report-employee"
-                  class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm form-select focus:outline-none focus:ring-2 focus:ring-purple-500 w-48 font-semibold">
+                  class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 w-48 font-semibold">
                   <option value="">All Employees</option>
                 </select>
               </div>
               <div class="flex flex-col">
                 <label class="block text-xs font-semibold text-slate-500 mb-1">From Date</label>
-                <input type="date" id="admin-report-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+                <input type="date" id="admin-report-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
               </div>
               <div class="flex flex-col">
                 <label class="block text-xs font-semibold text-slate-500 mb-1">To Date</label>
-                <input type="date" id="admin-report-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+                <input type="date" id="admin-report-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
               </div>
               <div class="flex gap-2">
                 <button id="btn-admin-filter-reports" class="btn-primary text-sm flex items-center gap-1">
@@ -784,7 +785,7 @@
               <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-1.5">
                 <span class="text-xs font-semibold uppercase tracking-wider text-slate-500">Total Hours Logged</span>
                 <div class="flex items-baseline justify-between">
-                  <span id="report-admin-total-hours" class="text-2xl font-bold text-purple-600">0.00 h</span>
+                  <span id="report-admin-total-hours" class="text-2xl font-bold text-indigo-600">0.00 h</span>
                   <span class="text-xs text-slate-400">Team Total</span>
                 </div>
               </div>
@@ -807,7 +808,7 @@
             <!-- Detailed Shifts Table -->
             <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm print-area" id="admin-print-area">
               <div class="hidden print:block mb-6 text-center border-b border-slate-200 pb-4">
-                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Dashboard Summary Report</h1>
+                <h1 class="text-3xl font-bold text-slate-900 tracking-tight">Timesheet Summary Report</h1>
                 <p class="text-slate-500 text-sm mt-1">Generated on <span id="print-date"></span></p>
               </div>
               <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 print:hidden">Shifts Summary List</h3>
@@ -815,12 +816,12 @@
                 <table class="w-full text-sm">
                   <thead>
                     <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider print:text-slate-800">
-                      <th id="th-adm-rep-name" class="pb-3 px-2">Employee<span id="sort-adminReport-employee_name"> Γåò</span></th>
-                      <th id="th-adm-rep-date" class="pb-3 px-2">Date<span id="sort-adminReport-date"> Γåò</span></th>
-                      <th id="th-adm-rep-type" class="pb-3 px-2">Shift Type<span id="sort-adminReport-shift_type"> Γåò</span></th>
+                      <th id="th-adm-rep-name" class="pb-3 px-2">Employee<span id="sort-adminReport-employee_name"> ↕</span></th>
+                      <th id="th-adm-rep-date" class="pb-3 px-2">Date<span id="sort-adminReport-date"> ↕</span></th>
+                      <th id="th-adm-rep-type" class="pb-3 px-2">Shift Type<span id="sort-adminReport-shift_type"> ↕</span></th>
                       <th class="pb-3 px-2">Started (Clock-In)</th>
                       <th class="pb-3 px-2">Finished (Clock-Out)</th>
-                      <th id="th-adm-rep-hours" class="pb-3 px-2">Hours<span id="sort-adminReport-hours"> Γåò</span></th>
+                      <th id="th-adm-rep-hours" class="pb-3 px-2">Hours<span id="sort-adminReport-hours"> ↕</span></th>
                     </tr>
                   </thead>
                   <tbody id="admin-report-body" class="divide-y divide-slate-100 text-slate-700 print:text-slate-800">
@@ -839,12 +840,12 @@
                 Add Shift
               </button>
               <select id="filter-employee"
-                class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm form-select focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold shadow-sm w-44">
+                class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm form-select focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold shadow-sm w-44">
                 <option value="">All Employees</option>
               </select>
-              <input type="date" id="filter-date-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+              <input type="date" id="filter-date-from" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
               <span class="text-slate-400 text-sm font-semibold">to</span>
-              <input type="date" id="filter-date-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+              <input type="date" id="filter-date-to" class="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
               <button id="btn-filter-shifts" class="btn-ghost text-sm border border-slate-200 hover:bg-slate-50 text-slate-700 flex items-center gap-1.5">
                 Filter
               </button>
@@ -854,12 +855,12 @@
                 <table class="w-full text-sm">
                   <thead>
                     <tr class="text-left text-slate-600 border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider">
-                      <th id="th-adm-sh-name" class="pb-3 px-2">Employee<span id="sort-adminShifts-employee_name"> Γåò</span></th>
-                      <th id="th-adm-sh-date" class="pb-3 px-2">Date<span id="sort-adminShifts-date"> Γåò</span></th>
-                      <th id="th-adm-sh-type" class="pb-3 px-2">Shift Type<span id="sort-adminShifts-shift_type"> Γåò</span></th>
+                      <th id="th-adm-sh-name" class="pb-3 px-2">Employee<span id="sort-adminShifts-employee_name"> ↕</span></th>
+                      <th id="th-adm-sh-date" class="pb-3 px-2">Date<span id="sort-adminShifts-date"> ↕</span></th>
+                      <th id="th-adm-sh-type" class="pb-3 px-2">Shift Type<span id="sort-adminShifts-shift_type"> ↕</span></th>
                       <th class="pb-3 px-2">In</th>
                       <th class="pb-3 px-2">Out</th>
-                      <th id="th-adm-sh-hours" class="pb-3 px-2">Hours<span id="sort-adminShifts-hours"> Γåò</span></th>
+                      <th id="th-adm-sh-hours" class="pb-3 px-2">Hours<span id="sort-adminShifts-hours"> ↕</span></th>
                       <th class="pb-3 px-2">Actions</th>
                     </tr>
                   </thead>
@@ -899,7 +900,7 @@
 
         </div>
 
-        <!-- ΓöÇΓöÇΓöÇ Admin Settings Tab ΓöÇΓöÇΓöÇ -->
+        <!-- ─── Admin Settings Tab ─── -->
         <div id="tab-settings" class="tab-content space-y-6">
           <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm max-w-xl space-y-4">
             <h3 class="text-lg font-bold text-slate-900 border-b border-slate-100 pb-3">Admin Panel Settings</h3>
@@ -911,7 +912,7 @@
                 </div>
                 <div class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" checked class="sr-only peer">
-                  <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-600"></div>
+                  <div class="w-9 h-5 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
                 </div>
               </div>
               <div class="flex justify-between items-center py-2 border-b border-slate-50">
@@ -921,7 +922,7 @@
                 </div>
                 <div class="relative inline-flex items-center cursor-pointer">
                   <input type="checkbox" checked disabled class="sr-only peer">
-                  <div class="w-9 h-5 bg-purple-600 rounded-full after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 opacity-70"></div>
+                  <div class="w-9 h-5 bg-indigo-600 rounded-full after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 opacity-70"></div>
                 </div>
               </div>
             </div>
@@ -932,14 +933,14 @@
     </div>
   </div>
 
-  <!-- ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ
+  <!-- ════════════════════════════════════════════════════════════
   MODALS
-  ΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉΓòÉ -->
+  ════════════════════════════════════════════════════════════ -->
 
   <!-- Generic Alert / Confirm Modal -->
   <div id="modal-alert" class="hidden fixed inset-0 z-50 modal-overlay flex items-center justify-center p-4">
     <div class="bg-white border border-slate-200 rounded-xl shadow-2xl p-6 max-w-sm w-full space-y-4 text-center">
-      <div class="w-12 h-12 bg-purple-50 border border-purple-100 text-purple-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
+      <div class="w-12 h-12 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full flex items-center justify-center mx-auto shadow-sm">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
       </div>
       <p id="modal-alert-msg" class="text-slate-700 text-sm font-semibold"></p>
@@ -958,14 +959,14 @@
         <div>
           <label class="block text-xs font-semibold text-slate-500 mb-1">Name</label>
           <input type="text" id="form-employee-name" required
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-500 mb-1">
             Password <span class="text-slate-400 font-normal" id="emp-pass-hint"></span>
           </label>
           <input type="text" id="form-employee-password"
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold"
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
             placeholder="Leave blank to keep current" />
         </div>
         <div class="flex gap-3 justify-end pt-2">
@@ -985,25 +986,25 @@
         <div id="admin-only-shift-field">
           <label class="block text-xs font-semibold text-slate-500 mb-1">Employee</label>
           <select id="form-shift-employee"
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 form-select font-semibold">
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 form-select font-semibold">
             <option value="">Select</option>
           </select>
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-500 mb-1">Date</label>
           <input type="date" id="form-shift-date" required
-            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">Start Time</label>
             <input type="time" id="form-shift-start" value="08:00" required
-              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-500 mb-1">End Time</label>
             <input type="time" id="form-shift-end" value="17:00"
-              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 font-semibold" />
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 text-slate-800 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold" />
           </div>
         </div>
         <div class="flex gap-3 justify-end pt-2">
@@ -1015,7 +1016,7 @@
   </div>
 
   <script>
-    /* ΓöÇΓöÇΓöÇ State ΓöÇΓöÇΓöÇ */
+    /* ─── State ─── */
     let state = {
       token: localStorage.getItem('token'),
       employeeId: null,
@@ -1029,7 +1030,7 @@
     let userChangedTime = false;
     let adminPollInterval = null;
 
-    /* ΓöÇΓöÇΓöÇ Sorting State & Helpers ΓöÇΓöÇΓöÇ */
+    /* ─── Sorting State & Helpers ─── */
     let sortStates = {
       empShifts: { col: 'date', order: 'desc' },
       empReport: { col: 'date', order: 'desc' },
@@ -1080,14 +1081,14 @@
       document.querySelectorAll(`[id^="sort-${tableId}-"]`).forEach(span => {
         const colName = span.id.replace(`sort-${tableId}-`, '');
         if (colName === sort.col) {
-          span.textContent = sort.order === 'asc' ? ' Γû▓' : ' Γû╝';
+          span.textContent = sort.order === 'asc' ? ' ▲' : ' ▼';
         } else {
-          span.textContent = ' Γåò';
+          span.textContent = ' ↕';
         }
       });
     }
 
-    /* ΓöÇΓöÇΓöÇ Mock Database for Demo Mode ΓöÇΓöÇΓöÇ */
+    /* ─── Mock Database for Demo Mode ─── */
     const MOCK_ADMIN_DASHBOARD = {
       weekly_hours: {
         "John Doe": 38.5,
@@ -1270,7 +1271,7 @@
       Chart.defaults.plugins.tooltip.borderWidth = 1;
     }
 
-    /* ΓöÇΓöÇΓöÇ API ΓöÇΓöÇΓöÇ */
+    /* ─── API ─── */
     async function api(path, options = {}) {
       if (state.isDemoAdmin && path.includes('/api/admin/')) {
         return handleDemoAdminApi(path, options);
@@ -1288,7 +1289,7 @@
       return res.json();
     }
 
-    /* ΓöÇΓöÇΓöÇ Time & Date Helpers ΓöÇΓöÇΓöÇ */
+    /* ─── Time & Date Helpers ─── */
     function time24to12h(time24) {
       if (!time24) return null;
       const [h, m] = time24.split(':').map(Number);
@@ -1319,7 +1320,7 @@
       document.getElementById(toId).value = today.toISOString().split('T')[0];
     }
 
-    /* ΓöÇΓöÇΓöÇ Modal Helpers ΓöÇΓöÇΓöÇ */
+    /* ─── Modal Helpers ─── */
     function openModal(id) { document.getElementById(id).classList.remove('js-hidden'); }
 
     function closeModal(id) { document.getElementById(id).classList.add('js-hidden'); }
@@ -1331,7 +1332,7 @@
 
     document.getElementById('modal-alert-ok').addEventListener('click', () => closeModal('modal-alert'));
 
-    /* ΓöÇΓöÇΓöÇ View & Role Swapping ΓöÇΓöÇΓöÇ */
+    /* ─── View & Role Swapping ─── */
     function showView(viewId) {
       ['login-view', 'employee-view', 'admin-view'].forEach(id => {
         document.getElementById(id).classList.add('js-hidden');
@@ -1363,7 +1364,7 @@
       }
     }
 
-    /* ΓöÇΓöÇΓöÇ Login ΓöÇΓöÇΓöÇ */
+    /* ─── Login ─── */
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const password = document.getElementById('login-password').value;
@@ -1395,7 +1396,7 @@
       }
     });
 
-    /* ΓöÇΓöÇΓöÇ Employee Tab Controller ΓöÇΓöÇΓöÇ */
+    /* ─── Employee Tab Controller ─── */
     async function initEmployee() {
       showView('employee-view');
       document.getElementById('emp-sidebar-name').textContent = state.employeeName;
@@ -1442,16 +1443,16 @@
 
       document.querySelectorAll('nav .employee-tab-btn').forEach(btn => {
         if (btn.dataset.tab === tabName) {
-          btn.classList.add('bg-purple-100', 'text-purple-700');
+          btn.classList.add('bg-indigo-100', 'text-indigo-700');
           btn.classList.remove('text-slate-500', 'hover:text-slate-700');
         } else {
-          btn.classList.remove('bg-purple-100', 'text-purple-700');
+          btn.classList.remove('bg-indigo-100', 'text-indigo-700');
           btn.classList.add('text-slate-500', 'hover:text-slate-700');
         }
       });
     }
 
-    /* ΓöÇΓöÇΓöÇ Employee Dashboard Data ΓöÇΓöÇΓöÇ */
+    /* ─── Employee Dashboard Data ─── */
     async function loadEmployeeData() {
       try {
         const me = await api('/api/employee/me');
@@ -1511,7 +1512,7 @@
         } else {
           banner.classList.add('js-hidden');
           document.getElementById('kpi-emp-shift-type').textContent = 'None';
-          clockBtn.className = 'w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl transition text-base shadow-md flex items-center justify-center gap-2';
+          clockBtn.className = 'w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl transition text-base shadow-md flex items-center justify-center gap-2';
           clockText.textContent = 'Clock In';
 
           if (window.timerInterval) clearInterval(window.timerInterval);
@@ -1525,7 +1526,7 @@
       }
     }
 
-    /* ΓöÇΓöÇΓöÇ Real-Time Clock In / Out Tracker Button ΓöÇΓöÇΓöÇ */
+    /* ─── Real-Time Clock In / Out Tracker Button ─── */
     document.getElementById('btn-clock-action').addEventListener('click', async () => {
       const active = await api('/api/employee/active-shift');
       const msgEl = document.getElementById('clock-message');
@@ -1560,7 +1561,7 @@
       }
     });
 
-    /* ΓöÇΓöÇΓöÇ Employee Weekly Bar Chart ΓöÇΓöÇΓöÇ */
+    /* ─── Employee Weekly Bar Chart ─── */
     async function loadEmployeeCharts() {
       try {
         const weekData = await api('/api/employee/hours/week');
@@ -1580,10 +1581,10 @@
               label: 'Working Hours',
               data: Object.values(weekData),
               backgroundColor: gradient,
-              borderColor: '#6B46C1',
+              borderColor: '#4f46e5',
               borderWidth: 1.5,
               borderRadius: 6,
-              hoverBackgroundColor: '#5B3FB5',
+              hoverBackgroundColor: '#4338ca',
             }]
           },
           options: {
@@ -1608,7 +1609,7 @@
       } catch (err) { /* noop */ }
     }
 
-    /* ΓöÇΓöÇΓöÇ Load Employee Logs Table ΓöÇΓöÇΓöÇ */
+    /* ─── Load Employee Logs Table ─── */
     async function loadEmployeeShifts() {
       try {
         const shifts = await api('/api/employee/shifts');
@@ -1653,9 +1654,9 @@
           <td class="py-3 px-2 text-slate-500">${dayName}</td>
           <td class="py-3 px-2 font-medium text-slate-700">${category}</td>
           <td class="py-3 px-2 font-mono text-slate-600">${s.clock_in}</td>
-          <td class="py-3 px-2 font-mono text-slate-600">${s.clock_out || 'ΓÇö'}</td>
+          <td class="py-3 px-2 font-mono text-slate-600">${s.clock_out || '—'}</td>
           <td class="py-3 px-2 text-slate-500">30m</td>
-          <td class="py-3 px-2 font-semibold text-slate-800">${s.hours != null ? s.hours.toFixed(2) : 'ΓÇö'} h</td>
+          <td class="py-3 px-2 font-semibold text-slate-800">${s.hours != null ? s.hours.toFixed(2) : '—'} h</td>
           <td class="py-3 px-2">
             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.clock_out ? 'bg-emerald-50 text-emerald-800 border border-emerald-100' : 'bg-amber-50 text-amber-800 border border-amber-100'}">
               ${s.clock_out ? 'Approved' : 'Active'}
@@ -1666,7 +1667,7 @@
       });
     }
 
-    /* ΓöÇΓöÇΓöÇ Employee Detailed Reports View ΓöÇΓöÇΓöÇ */
+    /* ─── Employee Detailed Reports View ─── */
     async function loadEmployeeReports() {
       try {
         let fromDate = document.getElementById('emp-report-from').value;
@@ -1713,13 +1714,13 @@
         tr.innerHTML = `
           <td class="py-3.5 px-2 font-semibold text-slate-900">${s.date}</td>
           <td class="py-3.5 px-2">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-purple-50 text-purple-800 border border-purple-100'}">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-indigo-50 text-indigo-800 border border-indigo-100'}">
               ${s.shift_type}
             </span>
           </td>
           <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_in}</td>
-          <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_out || 'ΓÇö'}</td>
-          <td class="py-3.5 px-2 font-semibold text-slate-900">${s.hours != null ? s.hours.toFixed(2) : 'ΓÇö'} h</td>
+          <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_out || '—'}</td>
+          <td class="py-3.5 px-2 font-semibold text-slate-900">${s.hours != null ? s.hours.toFixed(2) : '—'} h</td>
         `;
         tbody.appendChild(tr);
       });
@@ -1738,7 +1739,7 @@
       openModal('modal-shift');
     });
 
-    /* ΓöÇΓöÇΓöÇ Admin Controller ΓöÇΓöÇΓöÇ */
+    /* ─── Admin Controller ─── */
     async function initAdmin() {
       showView('admin-view');
       await loadAdminData();
@@ -1764,10 +1765,10 @@
 
       document.querySelectorAll('nav .admin-tab-btn').forEach(btn => {
         if (btn.dataset.tab === tabName) {
-          btn.classList.add('bg-purple-100', 'text-purple-700');
+          btn.classList.add('bg-indigo-100', 'text-indigo-700');
           btn.classList.remove('text-slate-500', 'hover:text-slate-700');
         } else {
-          btn.classList.remove('bg-purple-100', 'text-purple-700');
+          btn.classList.remove('bg-indigo-100', 'text-indigo-700');
           btn.classList.add('text-slate-500', 'hover:text-slate-700');
         }
       });
@@ -1800,10 +1801,10 @@
 
       document.querySelectorAll('.sub-tab-btn').forEach(btn => {
         if (btn.dataset.subtab === subtabName) {
-          btn.classList.add('bg-purple-100', 'text-purple-700');
+          btn.classList.add('bg-indigo-100', 'text-indigo-700');
           btn.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:bg-slate-50');
         } else {
-          btn.classList.remove('bg-purple-100', 'text-purple-700');
+          btn.classList.remove('bg-indigo-100', 'text-indigo-700');
           btn.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:bg-slate-50');
         }
       });
@@ -1871,7 +1872,7 @@
         
         const ctx = document.getElementById('admin-monthly-chart').getContext('2d');
         const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-        gradient.addColorStop(0, '#6B46C1');
+        gradient.addColorStop(0, '#4f46e5');
         gradient.addColorStop(1, 'rgba(79, 70, 229, 0.15)');
 
         state.adminMonthlyChart = new Chart(ctx, {
@@ -1882,10 +1883,10 @@
               label: 'Total Team Hours',
               data: history.map(m => m.hours),
               backgroundColor: history.map((_, i) =>
-                i === history.length - 1 ? '#6B46C1' : '#cbd5e1'
+                i === history.length - 1 ? '#4f46e5' : '#cbd5e1'
               ),
               borderRadius: 6,
-              hoverBackgroundColor: '#5B3FB5',
+              hoverBackgroundColor: '#4338ca',
             }]
           },
           options: {
@@ -1962,7 +1963,7 @@
         tr.innerHTML = `
           <td class="py-4 px-2">
             <div class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-purple-50 border border-purple-100 flex items-center justify-center text-purple-600 text-xs font-bold shrink-0 shadow-sm">${initial}</div>
+              <div class="w-8 h-8 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold shrink-0 shadow-sm">${initial}</div>
               <div>
                 <span class="font-semibold text-slate-900 block">${e.name}</span>
                 <span class="text-slate-400 text-xs">${role}</span>
@@ -1976,7 +1977,7 @@
           <td class="py-4 px-2">${statusHtml}</td>
           <td class="py-4 px-2">
             <div class="flex items-center gap-3">
-              <button class="text-purple-600 hover:text-purple-800 text-xs font-bold transition" onclick="approveDashboard(${e.id}, '${e.name}')">Approve</button>
+              <button class="text-indigo-600 hover:text-indigo-800 text-xs font-bold transition" onclick="approveTimesheet(${e.id}, '${e.name}')">Approve</button>
               <button class="text-slate-500 hover:text-slate-700 text-xs font-medium transition" onclick="viewEmployeeDetails(${e.id})">View Details</button>
             </div>
           </td>
@@ -1985,8 +1986,8 @@
       });
     }
 
-    function approveDashboard(id, name) {
-      showAlert(`Dashboard approved for ${name}`);
+    function approveTimesheet(id, name) {
+      showAlert(`Timesheet approved for ${name}`);
     }
 
     function viewEmployeeDetails(id) {
@@ -2042,15 +2043,15 @@
           <td class="py-3.5 px-2 font-bold text-slate-900">${s.employee_name}</td>
           <td class="py-3.5 px-2 text-slate-500 font-semibold">${s.date}</td>
           <td class="py-3.5 px-2">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-purple-50 text-purple-800 border border-purple-100'}">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-indigo-50 text-indigo-800 border border-indigo-100'}">
               ${s.shift_type}
             </span>
           </td>
           <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_in}</td>
-          <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_out || 'ΓÇö'}</td>
-          <td class="py-3.5 px-2 font-bold text-slate-900">${s.hours != null ? s.hours.toFixed(2) : 'ΓÇö'} h</td>
+          <td class="py-3.5 px-2 font-mono text-slate-600">${s.clock_out || '—'}</td>
+          <td class="py-3.5 px-2 font-bold text-slate-900">${s.hours != null ? s.hours.toFixed(2) : '—'} h</td>
           <td class="py-3.5 px-2">
-            <button class="text-purple-600 hover:text-purple-800 text-xs font-bold mr-3" onclick="editShift(${s.id})">Edit</button>
+            <button class="text-indigo-600 hover:text-indigo-800 text-xs font-bold mr-3" onclick="editShift(${s.id})">Edit</button>
             <button class="text-rose-600 hover:text-rose-800 text-xs font-bold" onclick="deleteShift(${s.id})">Delete</button>
           </td>
         `;
@@ -2182,7 +2183,7 @@
             </span>
           </td>
           <td class="py-3.5 px-2">
-            <button class="text-purple-600 hover:text-purple-800 text-xs font-bold mr-3" onclick="editEmployee(${e.id}, '${e.name}')">Edit</button>
+            <button class="text-indigo-600 hover:text-indigo-800 text-xs font-bold mr-3" onclick="editEmployee(${e.id}, '${e.name}')">Edit</button>
             <button class="text-rose-600 hover:text-rose-800 text-xs font-bold" onclick="deleteEmployee(${e.id})">Delete</button>
           </td>
         `;
@@ -2294,19 +2295,19 @@
           <td class="py-3.5 px-2 font-semibold text-slate-900 print:text-slate-955">${s.employee_name}</td>
           <td class="py-3.5 px-2 text-slate-500 font-medium print:text-slate-900">${s.date}</td>
           <td class="py-3.5 px-2">
-            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-purple-50 text-purple-800 border border-purple-100'} print:text-slate-900">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-semibold ${s.shift_type === 'Day' ? 'bg-amber-50 text-amber-800 border border-amber-100' : 'bg-indigo-50 text-indigo-800 border border-indigo-100'} print:text-slate-900">
               ${s.shift_type}
             </span>
           </td>
           <td class="py-3.5 px-2 font-mono text-slate-600 print:text-slate-900">${s.clock_in}</td>
-          <td class="py-3.5 px-2 font-mono text-slate-600 print:text-slate-900">${s.clock_out || 'ΓÇö'}</td>
-          <td class="py-3.5 px-2 font-semibold text-slate-900 print:text-slate-955">${s.hours != null ? s.hours.toFixed(2) : 'ΓÇö'} h</td>
+          <td class="py-3.5 px-2 font-mono text-slate-600 print:text-slate-900">${s.clock_out || '—'}</td>
+          <td class="py-3.5 px-2 font-semibold text-slate-900 print:text-slate-955">${s.hours != null ? s.hours.toFixed(2) : '—'} h</td>
         `;
         tbody.appendChild(tr);
       });
     }
 
-    /* ΓöÇΓöÇΓöÇ Logout ΓöÇΓöÇΓöÇ */
+    /* ─── Logout ─── */
     function logout() {
       state.token = null;
       state.employeeId = null;
@@ -2321,7 +2322,7 @@
       if (window.timerInterval) clearInterval(window.timerInterval);
     }
 
-    /* ΓöÇΓöÇΓöÇ Page Initialization and Binding ΓöÇΓöÇΓöÇ */
+    /* ─── Page Initialization and Binding ─── */
     async function init() {
       // Bind tabs routing
       document.querySelectorAll('.employee-tab-btn').forEach(btn => {
@@ -2340,7 +2341,7 @@
       const bindSort = (headerId, tableId, col) => {
         const el = document.getElementById(headerId);
         if (el) {
-          el.classList.add('cursor-pointer', 'select-none', 'hover:text-purple-600', 'transition');
+          el.classList.add('cursor-pointer', 'select-none', 'hover:text-indigo-600', 'transition');
           el.addEventListener('click', () => toggleSort(tableId, col));
         }
       };
